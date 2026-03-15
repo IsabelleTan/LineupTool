@@ -49,3 +49,21 @@ def test_delete_availability(client, game_and_player):
 
 def test_availability_game_not_found(client):
     assert client.get("/games/99999/availability/").status_code == 404
+
+
+def test_set_availability_player_not_found(client, game_and_player):
+    gid, _ = game_and_player
+    r = client.post(f"/games/{gid}/availability/", json={"player_id": 99999})
+    assert r.status_code == 404
+
+
+def test_update_availability_not_found(client, game_and_player):
+    gid, _ = game_and_player
+    r = client.patch(f"/games/{gid}/availability/99999", json={"is_available": False})
+    assert r.status_code == 404
+
+
+def test_delete_availability_not_found(client, game_and_player):
+    gid, _ = game_and_player
+    r = client.delete(f"/games/{gid}/availability/99999")
+    assert r.status_code == 404

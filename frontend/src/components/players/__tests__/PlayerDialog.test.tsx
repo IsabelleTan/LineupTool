@@ -90,3 +90,40 @@ describe('PlayerDialog — edit mode', () => {
     expect(onClose).toHaveBeenCalled()
   })
 })
+
+describe('PlayerDialog — null coercion', () => {
+  it('empty jersey_number and preferred_position become null in submission', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    render(<PlayerDialog open onClose={vi.fn()} onSubmit={onSubmit} />)
+    await userEvent.type(screen.getByLabelText(/name/i), 'Frank')
+    await userEvent.click(screen.getByRole('button', { name: /add player/i }))
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ jersey_number: null, preferred_position: null }),
+      )
+    })
+  })
+
+  it('empty capable_positions becomes null', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    render(<PlayerDialog open onClose={vi.fn()} onSubmit={onSubmit} />)
+    await userEvent.type(screen.getByLabelText(/name/i), 'Grace')
+    await userEvent.click(screen.getByRole('button', { name: /add player/i }))
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ capable_positions: null }),
+      )
+    })
+  })
+
+  it('submit button shows "Saving…" and is disabled during submission', async () => {
+    let resolve!: () => void
+    const onSubmit = vi.fn().mockReturnValue(new Promise<void>((r) => { resolve = r }))
+    render(<PlayerDialog open onClose={vi.fn()} onSubmit={onSubmit} />)
+    await userEvent.type(screen.getByLabelText(/name/i), 'Hank')
+    await userEvent.click(screen.getByRole('button', { name: /add player/i }))
+    expect(screen.getByRole('button', { name: /saving/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /cancel/i })).toBeDisabled()
+    resolve()
+  })
+})

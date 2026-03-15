@@ -37,3 +37,8 @@ def test_delete_game(client):
 
 def test_get_game_not_found(client):
     assert client.get("/games/99999").status_code == 404
+
+
+def test_update_game_not_found(client):
+    r = client.patch("/games/99999", json={"status": "completed"})
+    assert r.status_code == 404

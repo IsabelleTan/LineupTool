@@ -111,3 +111,47 @@ def test_lineup_with_slots_in_get(client, game, player):
     r = client.get(f"/lineups/{lid}")
     assert len(r.json()["slots"]) == 1
     assert r.json()["slots"][0]["batting_order"] == 3
+
+
+def test_create_lineup_game_not_found(client):
+    r = client.post("/lineups/", json={"game_id": 99999})
+    assert r.status_code == 404
+
+
+def test_add_slot_player_not_found(client, game):
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+    r = client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": 99999, "batting_order": 1, "fielding_position": "CF"},
+    )
+    assert r.status_code == 404
+
+
+def test_update_slot_batting_order_conflict(client, game, player):
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+    p2 = client.post("/players/", json={"name": "Bob"}).json()
+
+    client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
+    )
+    sid2 = client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": p2["id"], "batting_order": 2, "fielding_position": "LF"},
+    ).json()["id"]
+
+    r = client.patch(f"/lineups/{lid}/slots/{sid2}", json={"batting_order": 1})
+    assert r.status_code == 409
+
+
+def test_update_slot_wrong_lineup(client, game, player):
+    lineup_a = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+    lineup_b = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+
+    sid = client.post(
+        f"/lineups/{lineup_a}/slots",
+        json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
+    ).json()["id"]
+
+    r = client.patch(f"/lineups/{lineup_b}/slots/{sid}", json={"fielding_position": "SS"})
+    assert r.status_code == 404
