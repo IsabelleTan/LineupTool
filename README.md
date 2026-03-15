@@ -38,13 +38,6 @@ backend/
 └── pyproject.toml       # Python dependencies and project config
 ```
 
-### Models vs Schemas — what's the difference?
-
-- **Models** (`app/models/`) define the shape of the data *in the database*. Each model maps to a table. For example, `Player` maps to the `players` table.
-- **Schemas** (`app/schemas/`) define the shape of the data *in the API*. They control what fields are required when creating something, what's optional when updating, and what gets returned in a response.
-
-They're kept separate because you often don't want to expose every database field in the API (e.g. internal IDs, timestamps), and you may want different fields when creating vs updating a record.
-
 ### Database tables
 
 | Table | What it stores |
@@ -121,21 +114,11 @@ The frontend is a single-page app (SPA) — the browser loads it once and then n
 ```
 frontend/
 ├── src/
-│   ├── main.tsx          # Entry point — wraps the app in BrowserRouter and mounts it
-│   ├── App.tsx           # Root — top nav and route definitions
-│   ├── api/
-│   │   ├── client.ts     # Base fetch wrapper (sets base URL, JSON headers, error handling)
-│   │   └── players.ts    # Typed functions for the players API
-│   ├── components/
-│   │   ├── players/      # Feature components for the Players page
-│   │   └── ui/           # Auto-generated shadcn/ui primitives (Button, Dialog, Table, etc.)
-│   ├── lib/
-│   │   └── utils.ts      # cn() — combines Tailwind classes safely
-│   └── pages/
-│       └── PlayersPage.tsx  # Players roster page
-├── index.html            # The single HTML file the browser loads
-├── vite.config.ts        # Build tool and Vitest config
-└── package.json          # Node dependencies and scripts
+│   ├── api/         # Typed API client functions
+│   ├── components/  # Feature components and shadcn/ui primitives
+│   ├── lib/         # Shared utilities
+│   └── pages/       # One file per route
+└── package.json
 ```
 
 ### Pages
@@ -143,6 +126,8 @@ frontend/
 | Route | Page | What it shows |
 |---|---|---|
 | `/players` | PlayersPage | Full roster — add, edit, delete players |
+| `/games` | GamesPage | Scheduled games — add, edit, delete games |
+| `/games/:id` | GameDetailPage | Game detail — metadata and per-player availability |
 
 ### Running the frontend locally
 
@@ -165,7 +150,7 @@ cd frontend
 npm run test
 ```
 
-Tests use [Vitest](https://vitest.dev/) and [React Testing Library](https://testing-library.com/). They cover the API client, players API module, and the PlayerTable and PlayerDialog components.
+Tests use [Vitest](https://vitest.dev/) and [React Testing Library](https://testing-library.com/). They cover the API clients, page components, and UI components.
 
 ---
 
@@ -176,19 +161,3 @@ Two automated workflows run on every push and pull request:
 - **Backend** (`.github/workflows/backend.yml`) — runs on changes to `backend/`. Checks linting (ruff), formatting (black), all tests (pytest), and verifies no database migrations are missing.
 - **Frontend** (`.github/workflows/frontend.yml`) — runs on changes to `frontend/`. Checks linting (eslint) and runs a full TypeScript type-check and build.
 
----
-
-## Glossary
-
-A few terms that come up a lot if you're newer to web dev:
-
-| Term | What it means here |
-|---|---|
-| **API** | The set of URLs the backend exposes. The frontend calls these to read/write data. |
-| **REST** | A convention for structuring API URLs and HTTP methods (GET = read, POST = create, PATCH = update, DELETE = delete). |
-| **Endpoint** | One specific URL in the API, e.g. `POST /players`. |
-| **Schema** | A description of the expected shape of data — which fields exist, what types they are. |
-| **Migration** | A script that updates the database structure (e.g. adds a new column) in a tracked, reversible way. |
-| **ORM** | "Object-Relational Mapper" — SQLAlchemy lets you work with database rows as Python objects instead of writing raw SQL. |
-| **SPA** | "Single-Page App" — the browser loads one HTML file and React handles all navigation client-side. |
-| **Vite** | The build tool for the frontend. In dev mode it serves files instantly with hot reload; for production it bundles everything into optimised static files. |

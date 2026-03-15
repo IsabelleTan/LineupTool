@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import GameTable from '@/components/games/GameTable'
 import GameDialog from '@/components/games/GameDialog'
@@ -12,6 +13,7 @@ import {
 } from '@/api/games'
 
 export default function GamesPage() {
+  const navigate = useNavigate()
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -72,6 +74,7 @@ export default function GamesPage() {
       {!loading && !error && (
         <GameTable
           games={games}
+          onView={(g) => navigate(`/games/${g.id}`)}
           onEdit={openEdit}
           onDelete={(g) => void handleDelete(g)}
         />
