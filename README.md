@@ -112,7 +112,7 @@ Tests use an in-memory database so they don't touch your local `lineup.db`.
 
 ## Frontend
 
-**Tech:** React, TypeScript, Vite
+**Tech:** React 19, TypeScript, Vite, React Router, shadcn/ui (Tailwind CSS)
 
 The frontend is a single-page app (SPA) — the browser loads it once and then navigates between views without full page reloads. It's written in TypeScript (JavaScript with types) to catch mistakes at edit time rather than at runtime.
 
@@ -121,12 +121,28 @@ The frontend is a single-page app (SPA) — the browser loads it once and then n
 ```
 frontend/
 ├── src/
-│   ├── main.tsx   # Entry point — mounts the React app into the HTML page
-│   └── App.tsx    # Root component — top-level layout and routing lives here
-├── index.html     # The single HTML file the browser loads
-├── vite.config.ts # Build tool config
-└── package.json   # Node dependencies and scripts
+│   ├── main.tsx          # Entry point — wraps the app in BrowserRouter and mounts it
+│   ├── App.tsx           # Root — top nav and route definitions
+│   ├── api/
+│   │   ├── client.ts     # Base fetch wrapper (sets base URL, JSON headers, error handling)
+│   │   └── players.ts    # Typed functions for the players API
+│   ├── components/
+│   │   ├── players/      # Feature components for the Players page
+│   │   └── ui/           # Auto-generated shadcn/ui primitives (Button, Dialog, Table, etc.)
+│   ├── lib/
+│   │   └── utils.ts      # cn() — combines Tailwind classes safely
+│   └── pages/
+│       └── PlayersPage.tsx  # Players roster page
+├── index.html            # The single HTML file the browser loads
+├── vite.config.ts        # Build tool and Vitest config
+└── package.json          # Node dependencies and scripts
 ```
+
+### Pages
+
+| Route | Page | What it shows |
+|---|---|---|
+| `/players` | PlayersPage | Full roster — add, edit, delete players |
 
 ### Running the frontend locally
 
@@ -141,6 +157,15 @@ npm run dev
 ```
 
 The app will be available at `http://localhost:5173`. It expects the backend to be running at `http://localhost:8000`.
+
+### Running the frontend tests
+
+```bash
+cd frontend
+npm run test
+```
+
+Tests use [Vitest](https://vitest.dev/) and [React Testing Library](https://testing-library.com/). They cover the API client, players API module, and the PlayerTable and PlayerDialog components.
 
 ---
 
