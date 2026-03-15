@@ -1,0 +1,113 @@
+import pytest
+
+
+@pytest.fixture
+def game(client):
+    return client.post(
+        "/games/", json={"game_date": "2026-06-01", "opponent": "Opp"}
+    ).json()
+
+
+@pytest.fixture
+def player(client):
+    return client.post("/players/", json={"name": "Alice"}).json()
+
+
+def test_create_and_get_lineup(client, game):
+    r = client.post("/lineups/", json={"game_id": game["id"]})
+    assert r.status_code == 201
+    assert r.json()["name"] == "Draft"
+    assert r.json()["is_final"] is False
+
+    lid = r.json()["id"]
+    r2 = client.get(f"/lineups/{lid}")
+    assert r2.status_code == 200
+    assert r2.json()["slots"] == []
+
+
+def test_list_lineups_filtered_by_game(client, game):
+    client.post("/lineups/", json={"game_id": game["id"], "name": "A"})
+    client.post("/lineups/", json={"game_id": game["id"], "name": "B"})
+
+    r = client.get(f"/lineups/?game_id={game['id']}")
+    assert r.status_code == 200
+    assert len(r.json()) == 2
+
+
+def test_update_lineup(client, game):
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+
+    r = client.patch(f"/lineups/{lid}", json={"name": "Final", "is_final": True})
+    assert r.status_code == 200
+    assert r.json()["is_final"] is True
+
+
+def test_delete_lineup(client, game):
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+
+    assert client.delete(f"/lineups/{lid}").status_code == 204
+    assert client.get(f"/lineups/{lid}").status_code == 404
+
+
+def test_add_and_list_slots(client, game, player):
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+
+    r = client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
+    )
+    assert r.status_code == 201
+    assert r.json()["fielding_position"] == "CF"
+
+    r2 = client.get(f"/lineups/{lid}/slots")
+    assert len(r2.json()) == 1
+
+
+def test_duplicate_batting_order_returns_409(client, game, player):
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+    p2 = client.post("/players/", json={"name": "Bob"}).json()
+
+    client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
+    )
+    r = client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": p2["id"], "batting_order": 1, "fielding_position": "LF"},
+    )
+    assert r.status_code == 409
+
+
+def test_update_slot(client, game, player):
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+    sid = client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
+    ).json()["id"]
+
+    r = client.patch(f"/lineups/{lid}/slots/{sid}", json={"fielding_position": "SS"})
+    assert r.status_code == 200
+    assert r.json()["fielding_position"] == "SS"
+
+
+def test_delete_slot(client, game, player):
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+    sid = client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
+    ).json()["id"]
+
+    assert client.delete(f"/lineups/{lid}/slots/{sid}").status_code == 204
+    assert client.get(f"/lineups/{lid}/slots").json() == []
+
+
+def test_lineup_with_slots_in_get(client, game, player):
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+    client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": player["id"], "batting_order": 3, "fielding_position": "P"},
+    )
+
+    r = client.get(f"/lineups/{lid}")
+    assert len(r.json()["slots"]) == 1
+    assert r.json()["slots"][0]["batting_order"] == 3
