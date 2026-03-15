@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Player, PlayerCreate } from '@/api/players'
@@ -49,8 +50,8 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
   }, [open, player])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value, type, checked } = e.target
-    setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -129,13 +130,12 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
             <p className="text-xs text-muted-foreground">Comma-separated</p>
           </div>
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
+            <Checkbox
               id="is_active"
-              name="is_active"
               checked={form.is_active}
-              onChange={handleChange}
-              className="h-4 w-4 rounded border-gray-300"
+              onCheckedChange={(checked) =>
+                setForm((prev) => ({ ...prev, is_active: checked === true }))
+              }
             />
             <Label htmlFor="is_active">Active</Label>
           </div>
