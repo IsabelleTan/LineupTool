@@ -10,5 +10,6 @@ frontend/dist/
 
 # Misc
 .DS_Store
+.claude/
 CLAUDE.md
 .vscode/
