@@ -6,7 +6,7 @@ authors = [
     {name = "Isabelle Tan",email = "isabelle.tan@medivation.ch"}
 ]
 readme = "README.md"
-requires-python = "^3.12"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi (>=0.135.1,<0.136.0)",
     "uvicorn[standard] (>=0.41.0,<0.42.0)",
@@ -26,4 +26,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.group.dev.dependencies]
 black = "^26.3.1"
 ruff = "^0.15.6"
+pytest = "^8.0.0"
 
