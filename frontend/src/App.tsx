@@ -1,5 +1,6 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import PlayersPage from './pages/PlayersPage'
+import GamesPage from './pages/GamesPage'
 
 function Nav() {
   return (
@@ -13,6 +14,14 @@ function Nav() {
       >
         Players
       </NavLink>
+      <NavLink
+        to="/games"
+        className={({ isActive }) =>
+          isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'
+        }
+      >
+        Games
+      </NavLink>
     </nav>
   )
 }
@@ -25,6 +34,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/players" replace />} />
           <Route path="/players" element={<PlayersPage />} />
+          <Route path="/games" element={<GamesPage />} />
         </Routes>
       </main>
     </div>
