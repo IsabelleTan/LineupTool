@@ -25,6 +25,10 @@ export function getGames(): Promise<Game[]> {
   return apiFetch<Game[]>('/games/')
 }
 
+export function getGame(id: number): Promise<Game> {
+  return apiFetch<Game>(`/games/${id}`)
+}
+
 export function createGame(data: GameCreate): Promise<Game> {
   return apiFetch<Game>('/games/', {
     method: 'POST',

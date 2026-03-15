@@ -12,6 +12,7 @@ import type { Game } from '@/api/games'
 
 interface Props {
   games: Game[]
+  onView: (game: Game) => void
   onEdit: (game: Game) => void
   onDelete: (game: Game) => void
 }
@@ -26,7 +27,7 @@ function StatusBadge({ status }: { status: Game['status'] }) {
   return <Badge variant="outline">Scheduled</Badge>
 }
 
-export default function GameTable({ games, onEdit, onDelete }: Props) {
+export default function GameTable({ games, onView, onEdit, onDelete }: Props) {
   if (games.length === 0) {
     return (
       <p className="text-center text-muted-foreground py-12">No games yet.</p>
@@ -68,6 +69,9 @@ export default function GameTable({ games, onEdit, onDelete }: Props) {
               <StatusBadge status={game.status} />
             </TableCell>
             <TableCell className="text-right space-x-2">
+              <Button size="sm" variant="outline" onClick={() => onView(game)}>
+                View
+              </Button>
               <Button size="sm" variant="outline" onClick={() => onEdit(game)}>
                 Edit
               </Button>

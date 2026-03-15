@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import GamesPage from '../GamesPage'
 import type { Game } from '@/api/games'
@@ -43,12 +44,12 @@ beforeEach(() => {
 describe('GamesPage', () => {
   it('shows loading state on initial mount', () => {
     vi.mocked(getGames).mockReturnValue(new Promise(() => {}))
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     expect(screen.getByText(/loading/i)).toBeInTheDocument()
   })
 
   it('renders game rows after data loads', async () => {
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => {
       expect(screen.getByText('Red Sox')).toBeInTheDocument()
       expect(screen.getByText('Yankees')).toBeInTheDocument()
@@ -56,14 +57,14 @@ describe('GamesPage', () => {
   })
 
   it('"Add Game" button opens the dialog', async () => {
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => screen.getByText('Red Sox'))
     await userEvent.click(screen.getByRole('button', { name: /add game/i }))
     expect(screen.getByRole('heading', { name: 'Add Game' })).toBeInTheDocument()
   })
 
   it('Edit button opens dialog pre-filled with the game', async () => {
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => screen.getByText('Red Sox'))
     const editButtons = screen.getAllByRole('button', { name: /edit/i })
     await userEvent.click(editButtons[0])
@@ -74,7 +75,7 @@ describe('GamesPage', () => {
   it('Delete button calls deleteGame and reloads', async () => {
     vi.mocked(deleteGame).mockResolvedValue(undefined)
     vi.spyOn(window, 'confirm').mockReturnValue(true)
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => screen.getByText('Red Sox'))
     const deleteButtons = screen.getAllByRole('button', { name: /delete/i })
     await userEvent.click(deleteButtons[0])
@@ -85,7 +86,7 @@ describe('GamesPage', () => {
 
   it('cancel confirm does not call deleteGame', async () => {
     vi.spyOn(window, 'confirm').mockReturnValue(false)
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => screen.getByText('Red Sox'))
     const deleteButtons = screen.getAllByRole('button', { name: /delete/i })
     await userEvent.click(deleteButtons[0])
@@ -94,7 +95,7 @@ describe('GamesPage', () => {
 
   it('submit in add mode calls createGame', async () => {
     vi.mocked(createGame).mockResolvedValue({ ...game1, id: 3, opponent: 'Cubs' })
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => screen.getByText('Red Sox'))
     await userEvent.click(screen.getByRole('button', { name: /add game/i }))
     await userEvent.type(screen.getByLabelText(/opponent/i), 'Cubs')
@@ -108,7 +109,7 @@ describe('GamesPage', () => {
 
   it('submit in edit mode calls updateGame', async () => {
     vi.mocked(updateGame).mockResolvedValue({ ...game1, opponent: 'Red Sox Updated' })
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => screen.getByText('Red Sox'))
     const editButtons = screen.getAllByRole('button', { name: /edit/i })
     await userEvent.click(editButtons[0])
@@ -121,7 +122,7 @@ describe('GamesPage', () => {
 
   it('getGames is refetched after successful submit', async () => {
     vi.mocked(createGame).mockResolvedValue({ ...game1, id: 3, opponent: 'Cubs' })
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => screen.getByText('Red Sox'))
     expect(getGames).toHaveBeenCalledTimes(1)
     await userEvent.click(screen.getByRole('button', { name: /add game/i }))
@@ -135,7 +136,7 @@ describe('GamesPage', () => {
 
   it('shows error message when getGames rejects', async () => {
     vi.mocked(getGames).mockRejectedValue(new Error('Network error'))
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => {
       expect(screen.getByText('Network error')).toBeInTheDocument()
     })
@@ -143,7 +144,7 @@ describe('GamesPage', () => {
 
   it('shows error in dialog when createGame rejects', async () => {
     vi.mocked(createGame).mockRejectedValue(new Error('Server error'))
-    render(<GamesPage />)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => screen.getByText('Red Sox'))
     await userEvent.click(screen.getByRole('button', { name: /add game/i }))
     await userEvent.type(screen.getByLabelText(/opponent/i), 'Cubs')
@@ -152,5 +153,20 @@ describe('GamesPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Server error')).toBeInTheDocument()
     })
+  })
+
+  it('View button navigates to /games/:id', async () => {
+    render(
+      <MemoryRouter initialEntries={['/games']}>
+        <Routes>
+          <Route path="/games" element={<GamesPage />} />
+          <Route path="/games/:id" element={<div>Game Detail</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    await waitFor(() => screen.getByText('Red Sox'))
+    const viewButtons = screen.getAllByRole('button', { name: /view/i })
+    await userEvent.click(viewButtons[0])
+    expect(screen.getByText('Game Detail')).toBeInTheDocument()
   })
 })

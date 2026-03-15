@@ -1,6 +1,7 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import PlayersPage from './pages/PlayersPage'
 import GamesPage from './pages/GamesPage'
+import GameDetailPage from './pages/GameDetailPage'
 
 function Nav() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/players" replace />} />
           <Route path="/players" element={<PlayersPage />} />
           <Route path="/games" element={<GamesPage />} />
+          <Route path="/games/:id" element={<GameDetailPage />} />
         </Routes>
       </main>
     </div>
