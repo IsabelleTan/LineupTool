@@ -153,5 +153,7 @@ def test_update_slot_wrong_lineup(client, game, player):
         json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
     ).json()["id"]
 
-    r = client.patch(f"/lineups/{lineup_b}/slots/{sid}", json={"fielding_position": "SS"})
+    r = client.patch(
+        f"/lineups/{lineup_b}/slots/{sid}", json={"fielding_position": "SS"}
+    )
     assert r.status_code == 404
