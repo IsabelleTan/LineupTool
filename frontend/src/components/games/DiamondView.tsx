@@ -1,15 +1,6 @@
 import type { LineupSlotRead } from '@/api/lineups'
 import type { Player } from '@/api/players'
 
-// eslint-disable-next-line react-refresh/only-export-components
-export function abbreviateName(name: string): string {
-  if (!name) return '?'
-  const parts = name.trim().split(/\s+/)
-  if (parts.length === 1) return parts[0]
-  const last = parts[parts.length - 1]
-  return `${parts[0][0]}. ${last}`
-}
-
 const POSITIONS = [
   { key: 'CF', left: '50%', top: '5%'  },
   { key: 'LF', left: '15%', top: '28%' },
