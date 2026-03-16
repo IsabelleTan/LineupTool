@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import DiamondView, { abbreviateName } from '../DiamondView'
+import DiamondView from '../DiamondView'
+import { abbreviateName } from '@/lib/utils'
 import type { Player } from '@/api/players'
 import type { LineupSlotRead } from '@/api/lineups'
 
