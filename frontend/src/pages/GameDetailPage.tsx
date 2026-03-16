@@ -58,6 +58,7 @@ export default function GameDetailPage() {
   const [lineup, setLineup] = useState<LineupReadWithSlots | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [mutationError, setMutationError] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [busy, setBusy] = useState(false)
 
@@ -101,6 +102,7 @@ export default function GameDetailPage() {
     isAvailable: boolean,
   ) {
     setBusy(true)
+    setMutationError(null)
     try {
       // Marking unavailable: remove any existing lineup slot for this player first
       if (!isAvailable && lineup) {
@@ -109,6 +111,7 @@ export default function GameDetailPage() {
           await deleteSlot(lineup.id, slot.id)
           const afterDelete = await getLineup(lineup.id)
           await compactBattingOrders(lineup.id, afterDelete.slots)
+          setLineup(await getLineup(lineup.id))
         }
       }
       if (availabilityId === null) {
@@ -116,7 +119,9 @@ export default function GameDetailPage() {
       } else {
         await updateAvailability(gameId, availabilityId, isAvailable)
       }
-      await load()
+      setAvailability(await getAvailability(gameId))
+    } catch (err) {
+      setMutationError(err instanceof Error ? err.message : 'Failed to update availability')
     } finally {
       setBusy(false)
     }
@@ -125,6 +130,7 @@ export default function GameDetailPage() {
   async function handleAssign(playerId: number, position: string) {
     if (!lineup) return
     setBusy(true)
+    setMutationError(null)
     try {
       // Remove any player already occupying this position, then compact
       const existing = lineup.slots.find((s) => s.fielding_position === position)
@@ -141,6 +147,8 @@ export default function GameDetailPage() {
         fielding_position: position,
       })
       setLineup(await getLineup(lineup.id))
+    } catch (err) {
+      setMutationError(err instanceof Error ? err.message : 'Failed to update lineup')
     } finally {
       setBusy(false)
     }
@@ -149,11 +157,14 @@ export default function GameDetailPage() {
   async function handleUnassign(slotId: number) {
     if (!lineup) return
     setBusy(true)
+    setMutationError(null)
     try {
       await deleteSlot(lineup.id, slotId)
       const afterDelete = await getLineup(lineup.id)
       await compactBattingOrders(lineup.id, afterDelete.slots)
       setLineup(await getLineup(lineup.id))
+    } catch (err) {
+      setMutationError(err instanceof Error ? err.message : 'Failed to update lineup')
     } finally {
       setBusy(false)
     }
@@ -162,16 +173,23 @@ export default function GameDetailPage() {
   async function handleReorder(orderedSlotIds: number[]) {
     if (!lineup) return
     setBusy(true)
+    setMutationError(null)
     try {
       setLineup(await reorderSlots(lineup.id, orderedSlotIds))
+    } catch (err) {
+      setMutationError(err instanceof Error ? err.message : 'Failed to reorder')
     } finally {
       setBusy(false)
     }
   }
 
   async function handleEditSubmit(data: GameCreate) {
-    await updateGame(gameId, data)
-    await load()
+    setMutationError(null)
+    try {
+      setGame(await updateGame(gameId, data))
+    } catch (err) {
+      setMutationError(err instanceof Error ? err.message : 'Failed to save game')
+    }
   }
 
   // No record = available by default; only an explicit false excludes the player.
@@ -214,6 +232,10 @@ export default function GameDetailPage() {
         </p>
         {game.location && <p className="text-muted-foreground">{game.location}</p>}
       </div>
+
+      {mutationError && (
+        <p className="text-destructive text-sm">{mutationError}</p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-4 items-start">
         <div>

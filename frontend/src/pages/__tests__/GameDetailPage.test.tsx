@@ -194,14 +194,17 @@ describe('GameDetailPage', () => {
     expect(screen.getByDisplayValue('Red Sox')).toBeInTheDocument()
   })
 
-  it('submitting dialog calls updateGame then reloads', async () => {
+  it('submitting dialog calls updateGame and updates game state without full reload', async () => {
+    const updatedGame = { ...game, opponent: 'Yankees' }
+    vi.mocked(updateGame).mockResolvedValue(updatedGame)
     renderPage()
     await waitFor(() => screen.getByText(/vs Red Sox/i))
     await userEvent.click(screen.getByRole('button', { name: /edit game/i }))
     await userEvent.click(screen.getByRole('button', { name: /save changes/i }))
     await waitFor(() => {
       expect(updateGame).toHaveBeenCalledWith(1, expect.any(Object))
-      expect(getGame).toHaveBeenCalledTimes(2)
+      // targeted update: getGame is only called once (initial load), not again after edit
+      expect(getGame).toHaveBeenCalledTimes(1)
     })
   })
 
