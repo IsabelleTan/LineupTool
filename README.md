@@ -74,6 +74,7 @@ backend/
 | POST | `/lineups/:id/slots` | Add a player to a lineup |
 | PATCH | `/lineups/:id/slots/:slot_id` | Change a player's batting order or position |
 | DELETE | `/lineups/:id/slots/:slot_id` | Remove a player from a lineup |
+| PUT | `/lineups/:id/reorder` | Reorder all slots in a lineup by supplying the full ordered list of slot IDs |
 
 ### Running the backend locally
 
@@ -127,7 +128,7 @@ frontend/
 |---|---|---|
 | `/players` | PlayersPage | Full roster — add, edit, delete players |
 | `/games` | GamesPage | Scheduled games — add, edit, delete games |
-| `/games/:id` | GameDetailPage | Game detail — metadata and per-player availability |
+| `/games/:id` | GameDetailPage | Game detail — availability panel, fielding positions on a baseball diamond, and drag-and-drop batting order |
 
 ### Running the frontend locally
 
