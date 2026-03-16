@@ -149,9 +149,18 @@ def test_reorder_slots(client, game, player):
     p3 = client.post("/players/", json={"name": "Charlie"}).json()
     lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
 
-    s1 = client.post(f"/lineups/{lid}/slots", json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"}).json()["id"]
-    s2 = client.post(f"/lineups/{lid}/slots", json={"player_id": p2["id"], "batting_order": 2, "fielding_position": "SS"}).json()["id"]
-    s3 = client.post(f"/lineups/{lid}/slots", json={"player_id": p3["id"], "batting_order": 3, "fielding_position": "P"}).json()["id"]
+    s1 = client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
+    ).json()["id"]
+    s2 = client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": p2["id"], "batting_order": 2, "fielding_position": "SS"},
+    ).json()["id"]
+    s3 = client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": p3["id"], "batting_order": 3, "fielding_position": "P"},
+    ).json()["id"]
 
     r = client.put(f"/lineups/{lid}/reorder", json={"slot_ids": [s3, s1, s2]})
     assert r.status_code == 200

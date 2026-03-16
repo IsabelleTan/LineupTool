@@ -73,7 +73,9 @@ def reorder_slots(lineup_id: int, body: LineupReorder, db: Session = Depends(get
         raise HTTPException(status_code=404, detail="Lineup not found")
     slots = {s.id: s for s in lineup.slots}
     if set(body.slot_ids) != set(slots):
-        raise HTTPException(status_code=422, detail="slot_ids must match the lineup's slots exactly")
+        raise HTTPException(
+            status_code=422, detail="slot_ids must match the lineup's slots exactly"
+        )
     n = len(body.slot_ids)
     # Phase 1: temporary values above the final range to avoid unique-constraint conflicts.
     for i, slot_id in enumerate(body.slot_ids):
