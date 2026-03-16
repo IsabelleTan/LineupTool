@@ -6,6 +6,7 @@ import GameDialog from '@/components/games/GameDialog'
 import AvailabilityPanel from '@/components/games/AvailabilityPanel'
 import DiamondView from '@/components/games/DiamondView'
 import LineupOrder from '@/components/games/LineupOrder'
+import LineupPrintView from '@/components/games/LineupPrintView'
 import { getGame, updateGame, type Game, type GameCreate } from '@/api/games'
 import { getPlayers, type Player } from '@/api/players'
 import {
@@ -53,6 +54,7 @@ export default function GameDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [mutationError, setMutationError] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [printOpen, setPrintOpen] = useState(false)
   const [busy, setBusy] = useState(false)
 
   async function load() {
@@ -203,9 +205,14 @@ export default function GameDetailPage() {
         <Button variant="ghost" onClick={() => navigate('/games')}>
           ← Games
         </Button>
-        <Button variant="outline" onClick={() => setDialogOpen(true)}>
-          Edit Game
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setPrintOpen(true)}>
+            Print
+          </Button>
+          <Button variant="outline" onClick={() => setDialogOpen(true)}>
+            Edit Game
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-1">
@@ -266,6 +273,15 @@ export default function GameDetailPage() {
         onSubmit={handleEditSubmit}
         game={game}
       />
+
+      {printOpen && (
+        <LineupPrintView
+          game={game}
+          slots={lineup?.slots ?? []}
+          players={players}
+          onClose={() => setPrintOpen(false)}
+        />
+      )}
     </div>
   )
 }
