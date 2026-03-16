@@ -19,6 +19,37 @@ function PlayerHint({ player }: { player: Player }) {
   )
 }
 
+interface PlayerRowProps {
+  player: Player
+  isAvailable: boolean
+  record: GameAvailability | undefined
+  busy: boolean
+  onToggle: (playerId: number, availabilityId: number | null, isAvailable: boolean) => void
+}
+
+function PlayerRow({ player, isAvailable, record, busy, onToggle }: PlayerRowProps) {
+  return (
+    <div className="flex items-center justify-between py-1">
+      <span className="text-sm">
+        {player.name}
+        <PlayerHint player={player} />
+      </span>
+      <button
+        aria-label={isAvailable ? 'Mark Unavailable' : 'Mark Available'}
+        disabled={busy}
+        onClick={() => onToggle(player.id, record?.id ?? null, !isAvailable)}
+        className={`w-6 h-6 rounded-full text-white text-base font-bold leading-none flex items-center justify-center shrink-0 disabled:opacity-50 ${
+          isAvailable
+            ? 'bg-red-500 hover:bg-red-600'
+            : 'bg-green-500 hover:bg-green-600'
+        }`}
+      >
+        {isAvailable ? '−' : '+'}
+      </button>
+    </div>
+  )
+}
+
 export default function AvailabilityPanel({ players, availability, onToggle, busy = false }: Props) {
   if (players.length === 0) {
     return <p className="text-muted-foreground text-sm">No players found.</p>
@@ -35,30 +66,6 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
     return record?.is_available === false
   })
 
-  function renderPlayer(player: Player, isAvailable: boolean) {
-    const record = availability.find((a) => a.player_id === player.id)
-    return (
-      <div key={player.id} className="flex items-center justify-between py-1">
-        <span className="text-sm">
-          {player.name}
-          <PlayerHint player={player} />
-        </span>
-        <button
-          aria-label={isAvailable ? 'Mark Unavailable' : 'Mark Available'}
-          disabled={busy}
-          onClick={() => onToggle(player.id, record?.id ?? null, !isAvailable)}
-          className={`w-6 h-6 rounded-full text-white text-base font-bold leading-none flex items-center justify-center shrink-0 disabled:opacity-50 ${
-            isAvailable
-              ? 'bg-red-500 hover:bg-red-600'
-              : 'bg-green-500 hover:bg-green-600'
-          }`}
-        >
-          {isAvailable ? '−' : '+'}
-        </button>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-4">
       <div>
@@ -66,7 +73,7 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
         {available.length === 0 ? (
           <p className="text-muted-foreground text-xs">None</p>
         ) : (
-          <div>{available.map((p) => renderPlayer(p, true))}</div>
+          <div>{available.map((p) => <PlayerRow key={p.id} player={p} isAvailable={true} record={availability.find(a => a.player_id === p.id)} busy={busy} onToggle={onToggle} />)}</div>
         )}
       </div>
       <div>
@@ -74,7 +81,7 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
         {unavailable.length === 0 ? (
           <p className="text-muted-foreground text-xs">None</p>
         ) : (
-          <div>{unavailable.map((p) => renderPlayer(p, false))}</div>
+          <div>{unavailable.map((p) => <PlayerRow key={p.id} player={p} isAvailable={false} record={availability.find(a => a.player_id === p.id)} busy={busy} onToggle={onToggle} />)}</div>
         )}
       </div>
     </div>
