@@ -7,11 +7,12 @@ import AvailabilityPanel from '@/components/games/AvailabilityPanel'
 import DiamondView from '@/components/games/DiamondView'
 import LineupOrder from '@/components/games/LineupOrder'
 import { getGame, updateGame, type Game, type GameCreate } from '@/api/games'
-import { getPlayers } from '@/api/players'
+import { getPlayers, type Player } from '@/api/players'
 import {
   getAvailability,
   createAvailability,
   updateAvailability,
+  type GameAvailability,
 } from '@/api/availability'
 import { formatDate, isPlayerAvailable } from '@/lib/utils'
 import {
