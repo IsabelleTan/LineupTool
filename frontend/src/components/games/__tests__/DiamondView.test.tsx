@@ -135,6 +135,14 @@ describe('DiamondView', () => {
     expect(screen.getByRole('button', { name: 'Alice Smith' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Alice Jones' })).toBeInTheDocument()
   })
+
+  it('shows first+last name when two players share a first name at different positions', () => {
+    const aliceSS: Player = { ...alice, capable_positions: ['SS'] }
+    const aliceCF: Player = { ...alice, id: 99, name: 'Alice Jones', capable_positions: ['CF'] }
+    renderDiamond({ availablePlayers: [aliceSS, aliceCF], slots: [] })
+    expect(screen.getByRole('button', { name: 'Alice Smith' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Alice Jones' })).toBeInTheDocument()
+  })
 })
 
 describe('abbreviateName', () => {

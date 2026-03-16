@@ -62,8 +62,8 @@ function FieldSvg() {
   )
 }
 
-// Show first name only; fall back to "First Last" when two players at the
-// same position share the same first name.
+// Show first name only; fall back to "First Last" when any two available
+// players share the same first name (checked globally, not per-position).
 function getCardName(player: Player, peers: Player[]): string {
   const parts = player.name.trim().split(/\s+/)
   const first = parts[0]
@@ -92,7 +92,7 @@ export default function DiamondView({ availablePlayers, slots, onAssign, onUnass
               <span className="text-xs font-bold text-green-800">{pos.key}</span>
               <div className="flex flex-col gap-1">
                 {playersAtPos.map((player) => {
-                  const label = getCardName(player, playersAtPos)
+                  const label = getCardName(player, availablePlayers)
                   const assignedSlot = slots.find(
                     (s) => s.player_id === player.id && s.fielding_position === pos.key,
                   )
