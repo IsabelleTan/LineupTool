@@ -7,13 +7,13 @@ import AvailabilityPanel from '@/components/games/AvailabilityPanel'
 import DiamondView from '@/components/games/DiamondView'
 import LineupOrder from '@/components/games/LineupOrder'
 import { getGame, updateGame, type Game, type GameCreate } from '@/api/games'
-import { getPlayers, type Player } from '@/api/players'
+import { getPlayers } from '@/api/players'
 import {
   getAvailability,
   createAvailability,
   updateAvailability,
-  type GameAvailability,
 } from '@/api/availability'
+import { formatDate, isPlayerAvailable } from '@/lib/utils'
 import {
   getLineups,
   createLineup,
@@ -37,14 +37,6 @@ async function compactBattingOrders(
       await updateSlot(lineupId, sorted[i].id, { batting_order: i + 1 })
     }
   }
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 export default function GameDetailPage() {
@@ -192,11 +184,7 @@ export default function GameDetailPage() {
     }
   }
 
-  // No record = available by default; only an explicit false excludes the player.
-  const availablePlayers = players.filter((p) => {
-    const record = availability.find((a) => a.player_id === p.id)
-    return !record || record.is_available === true
-  })
+  const availablePlayers = players.filter((p) => isPlayerAvailable(p, availability))
 
   if (loading) {
     return <p className="text-muted-foreground">Loading…</p>

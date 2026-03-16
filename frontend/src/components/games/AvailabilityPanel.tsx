@@ -1,5 +1,6 @@
 import type { Player } from '@/api/players'
 import type { GameAvailability } from '@/api/availability'
+import { isPlayerAvailable } from '@/lib/utils'
 
 interface Props {
   players: Player[]
@@ -55,16 +56,8 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
     return <p className="text-muted-foreground text-sm">No players found.</p>
   }
 
-  // No record → available by default; only an explicit false makes a player unavailable.
-  const available = players.filter((p) => {
-    const record = availability.find((a) => a.player_id === p.id)
-    return !record || record.is_available === true
-  })
-
-  const unavailable = players.filter((p) => {
-    const record = availability.find((a) => a.player_id === p.id)
-    return record?.is_available === false
-  })
+  const available = players.filter((p) => isPlayerAvailable(p, availability))
+  const unavailable = players.filter((p) => !isPlayerAvailable(p, availability))
 
   return (
     <div className="space-y-4">

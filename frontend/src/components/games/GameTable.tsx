@@ -9,6 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import type { Game } from '@/api/games'
+import { formatDate } from '@/lib/utils'
 
 interface Props {
   games: Game[]
@@ -50,11 +51,7 @@ export default function GameTable({ games, onView, onEdit, onDelete }: Props) {
         {games.map((game) => (
           <TableRow key={game.id}>
             <TableCell>
-              {new Date(game.game_date + 'T00:00:00').toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })}
+              {formatDate(game.game_date)}
             </TableCell>
             <TableCell className="font-medium">{game.opponent}</TableCell>
             <TableCell className="text-muted-foreground">{game.location ?? '—'}</TableCell>
