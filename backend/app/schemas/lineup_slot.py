@@ -15,6 +15,10 @@ class LineupSlotUpdate(BaseModel):
     fielding_position: Optional[str] = None
 
 
+class LineupReorder(BaseModel):
+    slot_ids: list[int]
+
+
 class LineupSlotRead(BaseModel):
     id: int
     lineup_id: int

@@ -5,7 +5,12 @@ from .game_availability import (
     GameAvailabilityUpdate,
 )
 from .lineup import LineupCreate, LineupRead, LineupReadWithSlots, LineupUpdate
-from .lineup_slot import LineupSlotCreate, LineupSlotRead, LineupSlotUpdate
+from .lineup_slot import (
+    LineupReorder,
+    LineupSlotCreate,
+    LineupSlotRead,
+    LineupSlotUpdate,
+)
 from .player import PlayerCreate, PlayerRead, PlayerUpdate
 
 __all__ = [
@@ -25,4 +30,5 @@ __all__ = [
     "LineupSlotCreate",
     "LineupSlotUpdate",
     "LineupSlotRead",
+    "LineupReorder",
 ]
