@@ -8,6 +8,7 @@ from app.schemas import (
     LineupCreate,
     LineupRead,
     LineupReadWithSlots,
+    LineupReorder,
     LineupSlotCreate,
     LineupSlotRead,
     LineupSlotUpdate,
@@ -63,6 +64,27 @@ def delete_lineup(lineup_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Lineup not found")
     db.delete(lineup)
     db.commit()
+
+
+@router.put("/{lineup_id}/reorder", response_model=LineupReadWithSlots)
+def reorder_slots(lineup_id: int, body: LineupReorder, db: Session = Depends(get_db)):
+    lineup = db.get(Lineup, lineup_id)
+    if not lineup:
+        raise HTTPException(status_code=404, detail="Lineup not found")
+    slots = {s.id: s for s in lineup.slots}
+    if set(body.slot_ids) != set(slots):
+        raise HTTPException(status_code=422, detail="slot_ids must match the lineup's slots exactly")
+    n = len(body.slot_ids)
+    # Phase 1: temporary values above the final range to avoid unique-constraint conflicts.
+    for i, slot_id in enumerate(body.slot_ids):
+        slots[slot_id].batting_order = n + i + 1
+    db.flush()
+    # Phase 2: final values.
+    for i, slot_id in enumerate(body.slot_ids):
+        slots[slot_id].batting_order = i + 1
+    db.commit()
+    db.refresh(lineup)
+    return lineup
 
 
 # --- Slots ---

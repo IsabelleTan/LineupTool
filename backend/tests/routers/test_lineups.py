@@ -144,6 +144,30 @@ def test_update_slot_batting_order_conflict(client, game, player):
     assert r.status_code == 409
 
 
+def test_reorder_slots(client, game, player):
+    p2 = client.post("/players/", json={"name": "Bob"}).json()
+    p3 = client.post("/players/", json={"name": "Charlie"}).json()
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+
+    s1 = client.post(f"/lineups/{lid}/slots", json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"}).json()["id"]
+    s2 = client.post(f"/lineups/{lid}/slots", json={"player_id": p2["id"], "batting_order": 2, "fielding_position": "SS"}).json()["id"]
+    s3 = client.post(f"/lineups/{lid}/slots", json={"player_id": p3["id"], "batting_order": 3, "fielding_position": "P"}).json()["id"]
+
+    r = client.put(f"/lineups/{lid}/reorder", json={"slot_ids": [s3, s1, s2]})
+    assert r.status_code == 200
+    slots = r.json()["slots"]
+    order = {s["id"]: s["batting_order"] for s in slots}
+    assert order[s3] == 1
+    assert order[s1] == 2
+    assert order[s2] == 3
+
+
+def test_reorder_slots_wrong_lineup(client, game):
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+    r = client.put(f"/lineups/{lid}/reorder", json={"slot_ids": [999]})
+    assert r.status_code == 422
+
+
 def test_update_slot_wrong_lineup(client, game, player):
     lineup_a = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
     lineup_b = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
