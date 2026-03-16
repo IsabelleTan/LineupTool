@@ -222,7 +222,16 @@ export default function GameDetailPage() {
       </div>
 
       {mutationError && (
-        <p className="text-destructive text-sm">{mutationError}</p>
+        <div className="flex items-center gap-2 text-destructive text-sm">
+          <span>{mutationError}</span>
+          <button
+            onClick={() => setMutationError(null)}
+            className="text-destructive hover:opacity-70 font-medium"
+            aria-label="Dismiss error"
+          >
+            ×
+          </button>
+        </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-4 items-start">
