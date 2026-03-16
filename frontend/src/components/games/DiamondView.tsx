@@ -1,7 +1,7 @@
 import type { LineupSlotRead } from '@/api/lineups'
 import type { Player } from '@/api/players'
 
-const POSITIONS = [
+const FIELD_POSITIONS = [
   { key: 'CF', left: '50%', top: '5%'  },
   { key: 'LF', left: '15%', top: '28%' },
   { key: 'RF', left: '85%', top: '28%' },
@@ -12,6 +12,8 @@ const POSITIONS = [
   { key: 'P',  left: '50%', top: '57%' },
   { key: 'C',  left: '50%', top: '88%' },
 ]
+
+const BENCH_POSITIONS = ['DH', 'EH', 'BENCH']
 
 interface Props {
   availablePlayers: Player[]
@@ -73,73 +75,135 @@ function getCardName(player: Player, peers: Player[]): string {
   return collision && parts.length > 1 ? `${first} ${parts[parts.length - 1]}` : first
 }
 
+function PositionCard({
+  player,
+  posKey,
+  availablePlayers,
+  slots,
+  onAssign,
+  onUnassign,
+  busy,
+}: {
+  player: Player
+  posKey: string
+  availablePlayers: Player[]
+  slots: LineupSlotRead[]
+  onAssign: (playerId: number, position: string) => void
+  onUnassign: (slotId: number) => void
+  busy: boolean
+}) {
+  const label = getCardName(player, availablePlayers)
+  const assignedSlot = slots.find(
+    (s) => s.player_id === player.id && s.fielding_position === posKey,
+  )
+  const takenElsewhere = !assignedSlot && slots.some((s) => s.player_id === player.id)
+
+  if (takenElsewhere) {
+    return (
+      <div className="px-2 py-1 rounded text-xs border border-transparent bg-gray-100 text-gray-400 pointer-events-none">
+        {label}
+      </div>
+    )
+  }
+
+  if (assignedSlot) {
+    return (
+      <button
+        disabled={busy}
+        onClick={() => onUnassign(assignedSlot.id)}
+        className="px-2 py-1 rounded text-xs border border-transparent bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
+      >
+        {label}
+      </button>
+    )
+  }
+
+  return (
+    <button
+      disabled={busy}
+      onClick={() => onAssign(player.id, posKey)}
+      className="px-2 py-1 rounded text-xs bg-white border border-gray-300 hover:border-blue-400 hover:text-blue-600 disabled:opacity-50"
+    >
+      {label}
+    </button>
+  )
+}
+
 export default function DiamondView({ availablePlayers, slots, onAssign, onUnassign, busy }: Props) {
   return (
-    <div className="relative w-full min-h-[580px] bg-green-50 rounded-lg border border-green-200">
-      <FieldSvg />
-      {POSITIONS.map((pos) => {
-        const playersAtPos = availablePlayers.filter((p) =>
-          p.capable_positions?.includes(pos.key),
-        )
+    <div className="space-y-2">
+      <div className="relative w-full min-h-[580px] bg-green-50 rounded-lg border border-green-200">
+        <FieldSvg />
+        {FIELD_POSITIONS.map((pos) => {
+          const playersAtPos = availablePlayers.filter((p) =>
+            p.capable_positions?.includes(pos.key),
+          )
 
-        return (
-          <div
-            key={pos.key}
-            className="absolute -translate-x-1/2 -translate-y-1/2"
-            style={{ left: pos.left, top: pos.top }}
-          >
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-xs font-bold text-green-800">{pos.key}</span>
-              <div className="flex flex-col gap-1">
-                {playersAtPos.map((player) => {
-                  const label = getCardName(player, availablePlayers)
-                  const assignedSlot = slots.find(
-                    (s) => s.player_id === player.id && s.fielding_position === pos.key,
-                  )
-                  const takenElsewhere = !assignedSlot && slots.some(
-                    (s) => s.player_id === player.id,
-                  )
-
-                  if (takenElsewhere) {
-                    return (
-                      <div
-                        key={player.id}
-                        className="px-2 py-1 rounded text-xs border border-transparent bg-gray-100 text-gray-400 pointer-events-none"
-                      >
-                        {label}
-                      </div>
-                    )
-                  }
-
-                  if (assignedSlot) {
-                    return (
-                      <button
-                        key={player.id}
-                        disabled={busy}
-                        onClick={() => onUnassign(assignedSlot.id)}
-                        className="px-2 py-1 rounded text-xs border border-transparent bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
-                      >
-                        {label}
-                      </button>
-                    )
-                  }
-
-                  return (
-                    <button
+          return (
+            <div
+              key={pos.key}
+              className="absolute -translate-x-1/2 -translate-y-1/2"
+              style={{ left: pos.left, top: pos.top }}
+            >
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-xs font-bold text-green-800">{pos.key}</span>
+                <div className="flex flex-col gap-1">
+                  {playersAtPos.map((player) => (
+                    <PositionCard
                       key={player.id}
-                      disabled={busy}
-                      onClick={() => onAssign(player.id, pos.key)}
-                      className="px-2 py-1 rounded text-xs bg-white border border-gray-300 hover:border-blue-400 hover:text-blue-600 disabled:opacity-50"
-                    >
-                      {label}
-                    </button>
-                  )
-                })}
+                      player={player}
+                      posKey={pos.key}
+                      availablePlayers={availablePlayers}
+                      slots={slots}
+                      onAssign={onAssign}
+                      onUnassign={onUnassign}
+                      busy={busy}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
+
+      {/* Bench strip: DH, EH, BENCH */}
+      <div className="flex gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+        {BENCH_POSITIONS.map((posKey) => {
+          const slot = slots.find((s) => s.fielding_position === posKey)
+          const assignedPlayer = slot
+            ? availablePlayers.find((p) => p.id === slot.player_id)
+            : undefined
+          const unassignedPlayers = availablePlayers.filter((p) =>
+            p.capable_positions?.includes(posKey) && !slots.some((s) => s.player_id === p.id),
+          )
+
+          return (
+            <div key={posKey} className="flex flex-col gap-1 min-w-[70px]">
+              <span className="text-xs font-bold text-gray-600">{posKey}</span>
+              {assignedPlayer && (
+                <button
+                  disabled={busy}
+                  onClick={() => onUnassign(slot!.id)}
+                  className="px-2 py-1 rounded text-xs border border-transparent bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
+                >
+                  {getCardName(assignedPlayer, availablePlayers)}
+                </button>
+              )}
+              {!assignedPlayer && unassignedPlayers.map((player) => (
+                <button
+                  key={player.id}
+                  disabled={busy}
+                  onClick={() => onAssign(player.id, posKey)}
+                  className="px-2 py-1 rounded text-xs bg-white border border-gray-300 hover:border-blue-400 hover:text-blue-600 disabled:opacity-50"
+                >
+                  {getCardName(player, availablePlayers)}
+                </button>
+              ))}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

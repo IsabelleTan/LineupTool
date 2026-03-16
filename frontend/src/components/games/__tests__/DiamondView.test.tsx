@@ -59,9 +59,16 @@ function renderDiamond(overrides: Partial<Parameters<typeof DiamondView>[0]> = {
 }
 
 describe('DiamondView', () => {
-  it('renders all 9 position labels', () => {
+  it('renders all 9 field position labels', () => {
     renderDiamond({ availablePlayers: [] })
     for (const pos of ['CF', 'LF', 'RF', 'SS', '2B', '3B', '1B', 'P', 'C']) {
+      expect(screen.getByText(pos)).toBeInTheDocument()
+    }
+  })
+
+  it('renders bench position labels DH, EH, BENCH', () => {
+    renderDiamond({ availablePlayers: [] })
+    for (const pos of ['DH', 'EH', 'BENCH']) {
       expect(screen.getByText(pos)).toBeInTheDocument()
     }
   })
@@ -134,6 +141,27 @@ describe('DiamondView', () => {
     renderDiamond({ availablePlayers: [alice1, alice2], slots: [] })
     expect(screen.getByRole('button', { name: 'Alice Smith' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Alice Jones' })).toBeInTheDocument()
+  })
+
+  it('bench: shows assigned player in blue and calls onUnassign on click', async () => {
+    const dhPlayer: Player = { ...alice, capable_positions: ['DH'] }
+    const dhSlot: LineupSlotRead = { ...slotSS, id: 5, fielding_position: 'DH' }
+    const onUnassign = vi.fn()
+    renderDiamond({ availablePlayers: [dhPlayer], slots: [dhSlot], onUnassign })
+    const btn = screen.getAllByRole('button', { name: 'Alice' }).find(
+      (b) => b.className.includes('bg-blue-500'),
+    )!
+    await userEvent.click(btn)
+    expect(onUnassign).toHaveBeenCalledWith(dhSlot.id)
+  })
+
+  it('bench: unassigned capable player calls onAssign with bench position', async () => {
+    const onAssign = vi.fn()
+    const dhPlayer: Player = { ...alice, capable_positions: ['DH'] }
+    renderDiamond({ availablePlayers: [dhPlayer], slots: [], onAssign })
+    const btn = screen.getAllByRole('button', { name: 'Alice' })[0]
+    await userEvent.click(btn)
+    expect(onAssign).toHaveBeenCalledWith(dhPlayer.id, 'DH')
   })
 
   it('shows first+last name when two players share a first name at different positions', () => {
