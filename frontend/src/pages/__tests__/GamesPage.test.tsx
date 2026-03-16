@@ -46,12 +46,23 @@ describe('GamesPage', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument()
   })
 
-  it('renders game rows after data loads', async () => {
+  it('renders upcoming games by default (scheduled + future date)', async () => {
     render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => {
       expect(screen.getByText('Red Sox')).toBeInTheDocument()
+    })
+    // game2 is completed → shown on Past tab, not Upcoming
+    expect(screen.queryByText('Yankees')).not.toBeInTheDocument()
+  })
+
+  it('past tab shows completed/cancelled games', async () => {
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
+    await waitFor(() => screen.getByText('Red Sox'))
+    await userEvent.click(screen.getByRole('button', { name: /past/i }))
+    await waitFor(() => {
       expect(screen.getByText('Yankees')).toBeInTheDocument()
     })
+    expect(screen.queryByText('Red Sox')).not.toBeInTheDocument()
   })
 
   it('"Add Game" button opens the dialog', async () => {
