@@ -20,25 +20,10 @@ import {
   createLineup,
   getLineup,
   createSlot,
-  updateSlot,
   deleteSlot,
   reorderSlots,
   type LineupReadWithSlots,
 } from '@/api/lineups'
-
-// Sequential compaction: process front-to-back so each slot only moves into
-// a position that was just vacated — avoids unique-constraint conflicts.
-async function compactBattingOrders(
-  lineupId: number,
-  slots: { id: number; batting_order: number }[],
-) {
-  const sorted = [...slots].sort((a, b) => a.batting_order - b.batting_order)
-  for (let i = 0; i < sorted.length; i++) {
-    if (sorted[i].batting_order !== i + 1) {
-      await updateSlot(lineupId, sorted[i].id, { batting_order: i + 1 })
-    }
-  }
-}
 
 export default function GameDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -101,10 +86,7 @@ export default function GameDetailPage() {
       if (!isAvailable && lineup) {
         const slot = lineup.slots.find((s) => s.player_id === playerId)
         if (slot) {
-          await deleteSlot(lineup.id, slot.id)
-          const afterDelete = await getLineup(lineup.id)
-          await compactBattingOrders(lineup.id, afterDelete.slots)
-          setLineup(await getLineup(lineup.id))
+          setLineup(await deleteSlot(lineup.id, slot.id))
         }
       }
       if (availabilityId === null) {
@@ -125,18 +107,15 @@ export default function GameDetailPage() {
     setBusy(true)
     setMutationError(null)
     try {
-      // Remove any player already occupying this position, then compact
+      // Remove any player already occupying this position
       const existing = lineup.slots.find((s) => s.fielding_position === position)
-      let slotCount = lineup.slots.length
+      let current = lineup
       if (existing) {
-        await deleteSlot(lineup.id, existing.id)
-        const afterDelete = await getLineup(lineup.id)
-        await compactBattingOrders(lineup.id, afterDelete.slots)
-        slotCount = afterDelete.slots.length
+        current = await deleteSlot(lineup.id, existing.id)
       }
       await createSlot(lineup.id, {
         player_id: playerId,
-        batting_order: slotCount + 1,
+        batting_order: current.slots.length + 1,
         fielding_position: position,
       })
       setLineup(await getLineup(lineup.id))
@@ -152,10 +131,7 @@ export default function GameDetailPage() {
     setBusy(true)
     setMutationError(null)
     try {
-      await deleteSlot(lineup.id, slotId)
-      const afterDelete = await getLineup(lineup.id)
-      await compactBattingOrders(lineup.id, afterDelete.slots)
-      setLineup(await getLineup(lineup.id))
+      setLineup(await deleteSlot(lineup.id, slotId))
     } catch (err) {
       setMutationError(err instanceof Error ? err.message : 'Failed to update lineup')
     } finally {

@@ -97,8 +97,34 @@ def test_delete_slot(client, game, player):
         json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
     ).json()["id"]
 
-    assert client.delete(f"/lineups/{lid}/slots/{sid}").status_code == 204
-    assert client.get(f"/lineups/{lid}/slots").json() == []
+    r = client.delete(f"/lineups/{lid}/slots/{sid}")
+    assert r.status_code == 200
+    assert r.json()["slots"] == []
+
+
+def test_delete_slot_compacts_batting_orders(client, game, player):
+    p2 = client.post("/players/", json={"name": "Bob"}).json()
+    p3 = client.post("/players/", json={"name": "Charlie"}).json()
+    lid = client.post("/lineups/", json={"game_id": game["id"]}).json()["id"]
+
+    client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
+    )
+    s2 = client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": p2["id"], "batting_order": 2, "fielding_position": "SS"},
+    ).json()["id"]
+    client.post(
+        f"/lineups/{lid}/slots",
+        json={"player_id": p3["id"], "batting_order": 3, "fielding_position": "P"},
+    )
+
+    r = client.delete(f"/lineups/{lid}/slots/{s2}")
+    assert r.status_code == 200
+    slots = r.json()["slots"]
+    orders = sorted(s["batting_order"] for s in slots)
+    assert orders == [1, 2]
 
 
 def test_lineup_with_slots_in_get(client, game, player):
