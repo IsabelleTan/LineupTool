@@ -35,6 +35,17 @@ const playerNoPositions: Player = {
   capable_positions: null,
 }
 
+const carol: Player = {
+  id: 40,
+  name: 'Carol',
+  jersey_number: null,
+  preferred_position: 'LF',
+  capable_positions: ['LF'],
+  is_active: true,
+  created_at: '2024-01-01T00:00:00',
+  updated_at: '2024-01-01T00:00:00',
+}
+
 const slotSS: LineupSlotRead = {
   id: 1,
   lineup_id: 1,
@@ -142,6 +153,82 @@ describe('DiamondView', () => {
     renderDiamond({ availablePlayers: [aliceSS, aliceCF], slots: [] })
     expect(screen.getByRole('button', { name: 'Alice Smith' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Alice Jones' })).toBeInTheDocument()
+  })
+})
+
+describe('other/out-of-position', () => {
+  const carolSlotSS: LineupSlotRead = {
+    id: 99,
+    lineup_id: 1,
+    player_id: carol.id,
+    batting_order: 2,
+    fielding_position: 'SS',
+    created_at: '2024-01-01T00:00:00',
+    updated_at: '2024-01-01T00:00:00',
+  }
+
+  it('shows "Other" select when non-capable bench players exist', () => {
+    renderDiamond({ availablePlayers: [alice, carol], slots: [] })
+    // carol is not capable at SS; alice is — so SS should have an "Other" select
+    const selects = screen.getAllByRole('combobox')
+    expect(selects.length).toBeGreaterThan(0)
+  })
+
+  it('does not show "Other" select when all bench players are capable at that position', () => {
+    // alice is capable at SS; no non-capable bench players → no "Other" at SS
+    renderDiamond({ availablePlayers: [alice], slots: [] })
+    // alice is capable at SS and CF only; no other positions have non-capable players
+    // SS should have no combobox since alice (only player) IS capable there
+    const ssLabel = screen.getByText('SS')
+    const posContainer = ssLabel.closest('.flex.flex-col')!
+    expect(posContainer.querySelector('select')).toBeNull()
+  })
+
+  it('does not show "Other" select when non-capable player is already assigned', () => {
+    // carol assigned at SS → she's no longer on bench → otherOptions excludes her
+    renderDiamond({ availablePlayers: [carol], slots: [carolSlotSS] })
+    const ssLabel = screen.getByText('SS')
+    const posContainer = ssLabel.closest('.flex.flex-col')!
+    expect(posContainer.querySelector('select')).toBeNull()
+  })
+
+  it('calls onAssign with correct args when option selected', async () => {
+    const onAssign = vi.fn()
+    renderDiamond({ availablePlayers: [alice, carol], slots: [], onAssign })
+    // Find the "Other" select at SS (carol is not capable at SS)
+    const ssLabel = screen.getByText('SS')
+    const posContainer = ssLabel.closest('.flex.flex-col')!
+    const select = posContainer.querySelector('select')!
+    await userEvent.selectOptions(select, String(carol.id))
+    expect(onAssign).toHaveBeenCalledWith(carol.id, 'SS')
+  })
+
+  it('assigned non-capable player renders as blue button', () => {
+    renderDiamond({ availablePlayers: [carol], slots: [carolSlotSS] })
+    const buttons = screen.getAllByRole('button', { name: 'Carol' })
+    const blueButton = buttons.find((b) => b.className.includes('bg-blue-500'))
+    expect(blueButton).toBeTruthy()
+  })
+
+  it('position label turns amber when non-capable player assigned', () => {
+    renderDiamond({ availablePlayers: [carol], slots: [carolSlotSS] })
+    const ssLabel = screen.getByText('SS')
+    expect(ssLabel).toHaveClass('text-amber-600')
+  })
+
+  it('position label stays green when only capable players assigned', () => {
+    renderDiamond({ availablePlayers: [alice], slots: [slotSS] })
+    const ssLabel = screen.getByText('SS')
+    expect(ssLabel).toHaveClass('text-green-800')
+  })
+
+  it('clicking non-capable card calls onUnassign', async () => {
+    const onUnassign = vi.fn()
+    renderDiamond({ availablePlayers: [carol], slots: [carolSlotSS], onUnassign })
+    const buttons = screen.getAllByRole('button', { name: 'Carol' })
+    const blueButton = buttons.find((b) => b.className.includes('bg-blue-500'))!
+    await userEvent.click(blueButton)
+    expect(onUnassign).toHaveBeenCalledWith(carolSlotSS.id)
   })
 })
 

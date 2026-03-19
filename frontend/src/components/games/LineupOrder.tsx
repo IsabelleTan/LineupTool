@@ -28,9 +28,10 @@ interface RowProps {
   slot: LineupSlotRead
   index: number
   name: string
+  isOutOfPosition: boolean
 }
 
-function SortableRow({ slot, index, name }: RowProps) {
+function SortableRow({ slot, index, name, isOutOfPosition }: RowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: slot.id })
   const style = {
@@ -48,7 +49,9 @@ function SortableRow({ slot, index, name }: RowProps) {
       role="row"
     >
       <td className="py-1">{index + 1}. {name}</td>
-      <td className="py-1 pl-3 text-muted-foreground">{slot.fielding_position}</td>
+      <td className={`py-1 pl-3 ${isOutOfPosition ? 'text-amber-600' : 'text-muted-foreground'}`}>
+        {slot.fielding_position}
+      </td>
     </tr>
   )
 }
@@ -91,8 +94,10 @@ export default function LineupOrder({ slots, players, availablePlayers, onReorde
               </thead>
               <tbody>
                 {sorted.map((slot, idx) => {
-                  const name = players.find((p) => p.id === slot.player_id)?.name ?? 'Unknown'
-                  return <SortableRow key={slot.id} slot={slot} index={idx} name={name} />
+                  const player = players.find((p) => p.id === slot.player_id)
+                  const name = player?.name ?? 'Unknown'
+                  const isOutOfPosition = !!player && !player.capable_positions?.includes(slot.fielding_position)
+                  return <SortableRow key={slot.id} slot={slot} index={idx} name={name} isOutOfPosition={isOutOfPosition} />
                 })}
               </tbody>
             </table>
@@ -104,7 +109,12 @@ export default function LineupOrder({ slots, players, availablePlayers, onReorde
           <p className="text-xs text-muted-foreground font-medium border-b pb-1 mb-1">Bench</p>
           <ul className="text-sm space-y-1">
             {benchPlayers.map((p) => (
-              <li key={p.id} className="text-muted-foreground">{p.name}</li>
+              <li key={p.id} className="text-muted-foreground">
+                {p.name}
+                {p.capable_positions && p.capable_positions.length > 0 && (
+                  <span className="text-xs ml-1 opacity-60">{p.capable_positions.join(', ')}</span>
+                )}
+              </li>
             ))}
           </ul>
         </div>

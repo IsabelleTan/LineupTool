@@ -82,6 +82,20 @@ export default function DiamondView({ availablePlayers, slots, onAssign, onUnass
           p.capable_positions?.includes(pos.key),
         )
 
+        const assignedNonCapable = (() => {
+          const slot = slots.find(
+            (s) => s.fielding_position === pos.key &&
+            !playersAtPos.some((p) => p.id === s.player_id),
+          )
+          return slot ? { slot, player: availablePlayers.find((p) => p.id === slot.player_id) } : null
+        })()
+
+        const otherOptions = availablePlayers.filter(
+          (p) =>
+            !p.capable_positions?.includes(pos.key) &&
+            !slots.some((s) => s.player_id === p.id),
+        )
+
         return (
           <div
             key={pos.key}
@@ -89,7 +103,9 @@ export default function DiamondView({ availablePlayers, slots, onAssign, onUnass
             style={{ left: pos.left, top: pos.top }}
           >
             <div className="flex flex-col items-center gap-1">
-              <span className="text-xs font-bold text-green-800">{pos.key}</span>
+              <span className={`text-xs font-bold ${assignedNonCapable ? 'text-amber-600' : 'text-green-800'}`}>
+                {pos.key}
+              </span>
               <div className="flex flex-col gap-1">
                 {playersAtPos.map((player) => {
                   const label = getCardName(player, availablePlayers)
@@ -135,6 +151,32 @@ export default function DiamondView({ availablePlayers, slots, onAssign, onUnass
                     </button>
                   )
                 })}
+                {assignedNonCapable?.player && (
+                  <button
+                    disabled={busy}
+                    onClick={() => onUnassign(assignedNonCapable.slot.id)}
+                    className="px-2 py-1 rounded text-xs border border-transparent bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
+                  >
+                    {getCardName(assignedNonCapable.player, availablePlayers)}
+                  </button>
+                )}
+                {otherOptions.length > 0 && (
+                  <select
+                    disabled={busy}
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) onAssign(Number(e.target.value), pos.key)
+                    }}
+                    className="mt-1 max-w-[90px] text-xs rounded border border-gray-300 bg-white px-1 py-0.5 text-muted-foreground hover:border-blue-400 disabled:opacity-50 cursor-pointer"
+                  >
+                    <option value="">Other</option>
+                    {otherOptions.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {getCardName(p, availablePlayers)}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
           </div>
