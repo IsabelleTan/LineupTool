@@ -13,7 +13,6 @@ class Player(Base, TimestampMixin):
     name: Mapped[str] = mapped_column(String, nullable=False)
     jersey_number: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     capable_positions: Mapped[Optional[list[str]]] = mapped_column(JSON, nullable=True)
-    preferred_position: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     availabilities: Mapped[list["GameAvailability"]] = relationship(  # noqa: F821

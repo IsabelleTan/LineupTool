@@ -22,7 +22,6 @@ interface Props {
 interface FormState {
   name: string
   jersey_number: string
-  preferred_position: string
   capable_positions: string
   is_active: boolean
 }
@@ -31,7 +30,6 @@ function toFormState(player?: Player): FormState {
   return {
     name: player?.name ?? '',
     jersey_number: player?.jersey_number ?? '',
-    preferred_position: player?.preferred_position ?? '',
     capable_positions: player?.capable_positions?.join(', ') ?? '',
     is_active: player?.is_active ?? true,
   }
@@ -66,7 +64,6 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
       await onSubmit({
         name: form.name.trim(),
         jersey_number: form.jersey_number.trim() || null,
-        preferred_position: form.preferred_position.trim() || null,
         capable_positions: positions.length ? positions : null,
         is_active: form.is_active,
       })
@@ -106,16 +103,6 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
               value={form.jersey_number}
               onChange={handleChange}
               placeholder="e.g. 42"
-            />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="preferred_position">Preferred Position</Label>
-            <Input
-              id="preferred_position"
-              name="preferred_position"
-              value={form.preferred_position}
-              onChange={handleChange}
-              placeholder="e.g. SS"
             />
           </div>
           <div className="space-y-1">

@@ -10,7 +10,6 @@ const mockPlayer = {
   name: 'Alice',
   jersey_number: '7',
   capable_positions: ['SS', '2B'],
-  preferred_position: 'SS',
   is_active: true,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',

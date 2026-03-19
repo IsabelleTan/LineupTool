@@ -31,7 +31,6 @@ export default function PlayerTable({ players, onEdit, onDelete }: Props) {
         <TableRow>
           <TableHead>#</TableHead>
           <TableHead>Name</TableHead>
-          <TableHead>Preferred</TableHead>
           <TableHead>Capable</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="text-right">Actions</TableHead>
@@ -42,7 +41,6 @@ export default function PlayerTable({ players, onEdit, onDelete }: Props) {
           <TableRow key={player.id}>
             <TableCell className="text-muted-foreground">{player.jersey_number ?? '—'}</TableCell>
             <TableCell className="font-medium">{player.name}</TableCell>
-            <TableCell>{player.preferred_position ?? '—'}</TableCell>
             <TableCell>
               {player.capable_positions?.join(', ') ?? '—'}
             </TableCell>

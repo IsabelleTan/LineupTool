@@ -11,7 +11,6 @@ const mockGame = {
   opponent: 'Red Sox',
   location: 'Fenway Park',
   is_home: false,
-  status: 'scheduled' as const,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -40,11 +39,11 @@ describe('createGame', () => {
 
 describe('updateGame', () => {
   it('calls PATCH /games/:id with JSON body', async () => {
-    apiFetch.mockResolvedValue({ ...mockGame, status: 'completed' })
-    await updateGame(1, { status: 'completed' })
+    apiFetch.mockResolvedValue({ ...mockGame, opponent: 'Yankees' })
+    await updateGame(1, { opponent: 'Yankees' })
     expect(apiFetch).toHaveBeenCalledWith('/games/1', {
       method: 'PATCH',
-      body: JSON.stringify({ status: 'completed' }),
+      body: JSON.stringify({ opponent: 'Yankees' }),
     })
   })
 })

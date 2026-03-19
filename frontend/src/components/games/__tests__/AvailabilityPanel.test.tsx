@@ -9,7 +9,6 @@ const player: Player = {
   id: 1,
   name: 'Alice',
   jersey_number: '7',
-  preferred_position: 'SS',
   capable_positions: ['SS'],
   is_active: true,
   created_at: '2024-01-01T00:00:00',
@@ -21,7 +20,6 @@ const playerNoJersey: Player = {
   id: 2,
   name: 'Bob',
   jersey_number: null,
-  preferred_position: 'CF',
 }
 
 const playerNoRecord: Player = {
@@ -29,7 +27,6 @@ const playerNoRecord: Player = {
   id: 3,
   name: 'Charlie',
   jersey_number: '5',
-  preferred_position: null,
 }
 
 const availRecord: GameAvailability = {
@@ -98,9 +95,9 @@ describe('AvailabilityPanel', () => {
     expect(screen.getByText('#7')).toBeInTheDocument()
   })
 
-  it('falls back to preferred_position when jersey is null', () => {
+  it('shows no hint when jersey is null', () => {
     render(<AvailabilityPanel players={[playerNoJersey]} availability={[unavailRecord]} onToggle={vi.fn()} />)
-    expect(screen.getByText('CF')).toBeInTheDocument()
+    expect(screen.queryByText(/^#/)).not.toBeInTheDocument()
   })
 
   it('disables all toggle buttons when busy=true', () => {
