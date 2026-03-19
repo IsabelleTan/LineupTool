@@ -14,5 +14,3 @@ class FieldingPosition(str, enum.Enum):
     DH = "DH"
     EH = "EH"
     BENCH = "BENCH"
-
-

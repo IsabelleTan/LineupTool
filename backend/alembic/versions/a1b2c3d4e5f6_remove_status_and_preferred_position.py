@@ -24,5 +24,11 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     import sqlalchemy as sa
-    op.add_column("players", sa.Column("preferred_position", sa.String(), nullable=True))
-    op.add_column("games", sa.Column("status", sa.String(), nullable=False, server_default="scheduled"))
+
+    op.add_column(
+        "players", sa.Column("preferred_position", sa.String(), nullable=True)
+    )
+    op.add_column(
+        "games",
+        sa.Column("status", sa.String(), nullable=False, server_default="scheduled"),
+    )

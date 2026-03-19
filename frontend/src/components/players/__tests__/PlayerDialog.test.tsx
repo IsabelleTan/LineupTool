@@ -9,7 +9,6 @@ const alice: Player = {
   name: 'Alice',
   jersey_number: '7',
   capable_positions: ['SS', '2B'],
-  preferred_position: 'SS',
   is_active: true,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
@@ -92,14 +91,14 @@ describe('PlayerDialog — edit mode', () => {
 })
 
 describe('PlayerDialog — null coercion', () => {
-  it('empty jersey_number and preferred_position become null in submission', async () => {
+  it('empty jersey_number becomes null in submission', async () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined)
     render(<PlayerDialog open onClose={vi.fn()} onSubmit={onSubmit} />)
     await userEvent.type(screen.getByLabelText(/name/i), 'Frank')
     await userEvent.click(screen.getByRole('button', { name: /add player/i }))
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith(
-        expect.objectContaining({ jersey_number: null, preferred_position: null }),
+        expect.objectContaining({ jersey_number: null }),
       )
     })
   })
