@@ -255,6 +255,7 @@ export default function GameDetailPage() {
           <LineupOrder
             slots={lineup?.slots ?? []}
             players={players}
+            availablePlayers={availablePlayers}
             onReorder={(ids) => void handleReorder(ids)}
           />
         </div>
