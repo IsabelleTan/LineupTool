@@ -10,5 +10,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-
+  server: {
+    proxy: {
+      '/players': 'http://localhost:8000',
+      '/games':   'http://localhost:8000',
+      '/lineups': 'http://localhost:8000',
+    },
+  },
 })
