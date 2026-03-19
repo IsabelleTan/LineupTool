@@ -93,6 +93,30 @@ describe('LineupOrder', () => {
     expect(within(document.querySelector('tbody')!).getAllByRole('row')).toHaveLength(2)
   })
 
+  describe('out-of-position label', () => {
+    it('position label is amber when player is not capable at assigned position', () => {
+      const outOfPosSlot: LineupSlotRead = { ...slot1, fielding_position: 'P' } // Alice not capable at P
+      render(<LineupOrder slots={[outOfPosSlot]} players={players} availablePlayers={[]} />)
+      const cell = screen.getByRole('cell', { name: 'P' })
+      expect(cell).toHaveClass('text-amber-600')
+    })
+
+    it('position label is muted when player is capable at assigned position', () => {
+      render(<LineupOrder slots={[slot1]} players={players} availablePlayers={[]} />)
+      const cell = screen.getByRole('cell', { name: 'SS' })
+      expect(cell).toHaveClass('text-muted-foreground')
+      expect(cell).not.toHaveClass('text-amber-600')
+    })
+
+    it('position label is muted for unknown player', () => {
+      const orphanSlot: LineupSlotRead = { ...slot1, id: 99, player_id: 999 }
+      render(<LineupOrder slots={[orphanSlot]} players={players} availablePlayers={[]} />)
+      const cell = screen.getByRole('cell', { name: 'SS' })
+      expect(cell).toHaveClass('text-muted-foreground')
+      expect(cell).not.toHaveClass('text-amber-600')
+    })
+  })
+
   describe('bench section', () => {
     it('shows bench players not in slots', () => {
       render(<LineupOrder slots={[slot1]} players={players} availablePlayers={players} />)
@@ -121,6 +145,21 @@ describe('LineupOrder', () => {
     it('shows empty state when slots empty and no available players', () => {
       render(<LineupOrder slots={[]} players={players} availablePlayers={[]} />)
       expect(screen.getByText('No players assigned yet.')).toBeInTheDocument()
+    })
+
+    it('shows capable positions next to bench player name', () => {
+      render(<LineupOrder slots={[slot1]} players={players} availablePlayers={players} />)
+      const bench = screen.getByText('Bench').closest('div')!
+      expect(within(bench).getByText('CF')).toBeInTheDocument()
+    })
+
+    it('does not show position hint when capable_positions is null', () => {
+      const noPosBob: Player = { ...players[1], capable_positions: null }
+      render(<LineupOrder slots={[slot1]} players={[players[0], noPosBob]} availablePlayers={[players[0], noPosBob]} />)
+      const bench = screen.getByText('Bench').closest('div')!
+      // Bob row should not contain any position abbreviation span
+      const bobItem = within(bench).getByText('Bob')
+      expect(bobItem.nextSibling).toBeNull()
     })
   })
 })

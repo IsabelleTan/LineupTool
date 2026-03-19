@@ -238,8 +238,8 @@ describe('GameDetailPage', () => {
   it('diamond position labels visible after load', async () => {
     renderPage()
     await waitFor(() => screen.getByText(/vs Red Sox/i))
-    expect(screen.getByText('SS')).toBeInTheDocument()
-    expect(screen.getByText('CF')).toBeInTheDocument()
+    expect(screen.getAllByText('SS').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('CF').length).toBeGreaterThan(0)
   })
 
   it('onAssign calls createSlot then getLineup', async () => {
