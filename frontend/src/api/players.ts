@@ -5,7 +5,6 @@ export interface Player {
   name: string
   jersey_number: string | null
   capable_positions: string[] | null
-  preferred_position: string | null
   is_active: boolean
   created_at: string
   updated_at: string
@@ -15,7 +14,6 @@ export interface PlayerCreate {
   name: string
   jersey_number?: string | null
   capable_positions?: string[] | null
-  preferred_position?: string | null
   is_active?: boolean
 }
 
@@ -23,7 +21,6 @@ export interface PlayerUpdate {
   name?: string
   jersey_number?: string | null
   capable_positions?: string[] | null
-  preferred_position?: string | null
   is_active?: boolean
 }
 

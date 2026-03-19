@@ -20,7 +20,6 @@ const game1: Game = {
   opponent: 'Red Sox',
   location: 'Fenway Park',
   is_home: false,
-  status: 'scheduled',
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -31,7 +30,6 @@ const game2: Game = {
   opponent: 'Yankees',
   location: null,
   is_home: true,
-  status: 'completed',
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }

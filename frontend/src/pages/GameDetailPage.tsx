@@ -216,8 +216,7 @@ export default function GameDetailPage() {
             <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Home</Badge>
           ) : (
             <Badge variant="secondary">Away</Badge>
-          )}{' '}
-          · {game.status.charAt(0).toUpperCase() + game.status.slice(1)}
+          )}
         </p>
         {game.location && <p className="text-muted-foreground">{game.location}</p>}
       </div>

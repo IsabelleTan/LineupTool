@@ -18,16 +18,6 @@ interface Props {
   onDelete: (game: Game) => void
 }
 
-function StatusBadge({ status }: { status: Game['status'] }) {
-  if (status === 'completed') {
-    return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Completed</Badge>
-  }
-  if (status === 'cancelled') {
-    return <Badge variant="secondary">Cancelled</Badge>
-  }
-  return <Badge variant="outline">Scheduled</Badge>
-}
-
 export default function GameTable({ games, onView, onEdit, onDelete }: Props) {
   if (games.length === 0) {
     return (
@@ -43,7 +33,6 @@ export default function GameTable({ games, onView, onEdit, onDelete }: Props) {
           <TableHead>Opponent</TableHead>
           <TableHead>Location</TableHead>
           <TableHead>Home/Away</TableHead>
-          <TableHead>Status</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -61,9 +50,6 @@ export default function GameTable({ games, onView, onEdit, onDelete }: Props) {
               ) : (
                 <Badge variant="secondary">Away</Badge>
               )}
-            </TableCell>
-            <TableCell>
-              <StatusBadge status={game.status} />
             </TableCell>
             <TableCell className="text-right space-x-2">
               <Button size="sm" variant="outline" onClick={() => onView(game)}>
