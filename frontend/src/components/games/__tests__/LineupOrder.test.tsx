@@ -49,23 +49,23 @@ const slot2: LineupSlotRead = {
 
 describe('LineupOrder', () => {
   it('shows empty state when no slots', () => {
-    render(<LineupOrder slots={[]} players={players} />)
+    render(<LineupOrder slots={[]} players={players} availablePlayers={[]} />)
     expect(screen.getByText('No players assigned yet.')).toBeInTheDocument()
   })
 
   it('renders one row per slot', () => {
-    render(<LineupOrder slots={[slot1, slot2]} players={players} />)
+    render(<LineupOrder slots={[slot1, slot2]} players={players} availablePlayers={[]} />)
     expect(within(document.querySelector('tbody')!).getAllByRole('row')).toHaveLength(2)
   })
 
   it('renders player name and position in separate columns', () => {
-    render(<LineupOrder slots={[slot1]} players={players} />)
+    render(<LineupOrder slots={[slot1]} players={players} availablePlayers={[]} />)
     expect(screen.getByText('1. Alice')).toBeInTheDocument()
     expect(screen.getByRole('cell', { name: 'SS' })).toBeInTheDocument()
   })
 
   it('sorts slots by batting_order regardless of array order', () => {
-    render(<LineupOrder slots={[slot2, slot1]} players={players} />)
+    render(<LineupOrder slots={[slot2, slot1]} players={players} availablePlayers={[]} />)
     const rows = within(document.querySelector('tbody')!).getAllByRole('row')
     expect(rows[0]).toHaveTextContent('1. Alice')
     expect(rows[0]).toHaveTextContent('SS')
@@ -75,12 +75,12 @@ describe('LineupOrder', () => {
 
   it('shows "Unknown" for player not in players array', () => {
     const orphanSlot: LineupSlotRead = { ...slot1, id: 99, player_id: 999 }
-    render(<LineupOrder slots={[orphanSlot]} players={players} />)
+    render(<LineupOrder slots={[orphanSlot]} players={players} availablePlayers={[]} />)
     expect(screen.getByText('1. Unknown')).toBeInTheDocument()
   })
 
   it('resolves name from players array', () => {
-    render(<LineupOrder slots={[slot2]} players={players} />)
+    render(<LineupOrder slots={[slot2]} players={players} availablePlayers={[]} />)
     // Only one slot rendered, so it always shows position 1 regardless of stored batting_order
     expect(screen.getByText('1. Bob')).toBeInTheDocument()
     expect(screen.getByRole('cell', { name: 'CF' })).toBeInTheDocument()
@@ -88,8 +88,39 @@ describe('LineupOrder', () => {
 
   it('accepts onReorder callback prop without error', () => {
     const onReorder = vi.fn()
-    render(<LineupOrder slots={[slot1, slot2]} players={players} onReorder={onReorder} />)
+    render(<LineupOrder slots={[slot1, slot2]} players={players} availablePlayers={[]} onReorder={onReorder} />)
     // Verify component renders correctly with callback prop
     expect(within(document.querySelector('tbody')!).getAllByRole('row')).toHaveLength(2)
+  })
+
+  describe('bench section', () => {
+    it('shows bench players not in slots', () => {
+      render(<LineupOrder slots={[slot1]} players={players} availablePlayers={players} />)
+      expect(screen.getByText('Bench')).toBeInTheDocument()
+      expect(screen.getByText('Bob')).toBeInTheDocument()
+    })
+
+    it('does not show slotted player in bench', () => {
+      render(<LineupOrder slots={[slot1]} players={players} availablePlayers={players} />)
+      const bench = screen.getByText('Bench').closest('div')!
+      expect(within(bench).queryByText('Alice')).not.toBeInTheDocument()
+    })
+
+    it('hides bench section when all available are slotted', () => {
+      render(<LineupOrder slots={[slot1, slot2]} players={players} availablePlayers={players} />)
+      expect(screen.queryByText('Bench')).not.toBeInTheDocument()
+    })
+
+    it('shows only bench when slots is empty', () => {
+      render(<LineupOrder slots={[]} players={players} availablePlayers={[players[0]]} />)
+      expect(screen.getByText('Bench')).toBeInTheDocument()
+      expect(screen.getByText('Alice')).toBeInTheDocument()
+      expect(document.querySelector('table')).not.toBeInTheDocument()
+    })
+
+    it('shows empty state when slots empty and no available players', () => {
+      render(<LineupOrder slots={[]} players={players} availablePlayers={[]} />)
+      expect(screen.getByText('No players assigned yet.')).toBeInTheDocument()
+    })
   })
 })
