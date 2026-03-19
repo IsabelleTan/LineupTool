@@ -12,6 +12,7 @@ class Player(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     jersey_number: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    license_number: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     capable_positions: Mapped[Optional[list[str]]] = mapped_column(JSON, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 

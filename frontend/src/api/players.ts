@@ -4,6 +4,7 @@ export interface Player {
   id: number
   name: string
   jersey_number: string | null
+  license_number: string | null
   capable_positions: string[] | null
   is_active: boolean
   created_at: string
@@ -13,6 +14,7 @@ export interface Player {
 export interface PlayerCreate {
   name: string
   jersey_number?: string | null
+  license_number?: string | null
   capable_positions?: string[] | null
   is_active?: boolean
 }
@@ -20,6 +22,7 @@ export interface PlayerCreate {
 export interface PlayerUpdate {
   name?: string
   jersey_number?: string | null
+  license_number?: string | null
   capable_positions?: string[] | null
   is_active?: boolean
 }

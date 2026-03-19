@@ -9,6 +9,7 @@ const player: Player = {
   id: 1,
   name: 'Alice',
   jersey_number: '7',
+  license_number: null,
   capable_positions: ['SS'],
   is_active: true,
   created_at: '2024-01-01T00:00:00',
@@ -20,6 +21,7 @@ const playerNoJersey: Player = {
   id: 2,
   name: 'Bob',
   jersey_number: null,
+  license_number: null,
 }
 
 const playerNoRecord: Player = {
@@ -27,6 +29,7 @@ const playerNoRecord: Player = {
   id: 3,
   name: 'Charlie',
   jersey_number: '5',
+  license_number: null,
 }
 
 const availRecord: GameAvailability = {
