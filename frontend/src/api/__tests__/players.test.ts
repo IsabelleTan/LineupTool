@@ -9,6 +9,7 @@ const mockPlayer = {
   id: 1,
   name: 'Alice',
   jersey_number: '7',
+  license_number: null,
   capable_positions: ['SS', '2B'],
   is_active: true,
   created_at: '2024-01-01T00:00:00',

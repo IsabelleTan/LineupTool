@@ -8,6 +8,7 @@ const alice: Player = {
   id: 1,
   name: 'Alice',
   jersey_number: '7',
+  license_number: null,
   capable_positions: ['SS', '2B'],
   is_active: true,
   created_at: '2024-01-01T00:00:00',
@@ -18,6 +19,7 @@ const bob: Player = {
   id: 2,
   name: 'Bob',
   jersey_number: null,
+  license_number: null,
   capable_positions: null,
   is_active: false,
   created_at: '2024-01-01T00:00:00',
@@ -48,6 +50,12 @@ describe('PlayerTable', () => {
     // Bob has null jersey — should show em dash
     const dashes = screen.getAllByText('—')
     expect(dashes.length).toBeGreaterThan(0)
+  })
+
+  it('renders license number and falls back to — when null', () => {
+    const withLicense: Player = { ...alice, license_number: '99001' }
+    render(<PlayerTable players={[withLicense, bob]} onEdit={vi.fn()} onDelete={vi.fn()} />)
+    expect(screen.getByText('99001')).toBeInTheDocument()
   })
 
   it('calls onEdit with the correct player when Edit is clicked', async () => {
