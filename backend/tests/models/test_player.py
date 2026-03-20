@@ -26,8 +26,8 @@ def test_player_defaults(db):
     db.flush()
 
     assert player.jersey_number is None
+    assert player.license_number is None
     assert player.capable_positions is None
-    assert player.preferred_position is None
     assert player.is_active is True
 
 

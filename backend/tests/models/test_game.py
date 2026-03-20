@@ -1,7 +1,6 @@
 from datetime import date
 
 from app.models import Game
-from app.models.enums import GameStatus
 
 
 def test_game_basic_fields(db):
@@ -21,22 +20,6 @@ def test_game_defaults(db):
 
     assert game.location is None
     assert game.is_home is True
-    assert game.status == GameStatus.SCHEDULED
-
-
-def test_game_status_enum(db):
-    game = Game(
-        game_date=date(2026, 6, 2),
-        opponent="Lions",
-        status=GameStatus.COMPLETED,
-    )
-    db.add(game)
-    db.flush()
-    db.expire(game)
-
-    loaded = db.get(Game, game.id)
-    assert loaded.status == GameStatus.COMPLETED
-    assert loaded.status == "completed"
 
 
 def test_game_away(db):

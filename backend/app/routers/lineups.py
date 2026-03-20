@@ -146,10 +146,24 @@ def update_slot(
     return slot
 
 
-@router.delete("/{lineup_id}/slots/{slot_id}", status_code=204)
+@router.delete("/{lineup_id}/slots/{slot_id}", response_model=LineupReadWithSlots)
 def delete_slot(lineup_id: int, slot_id: int, db: Session = Depends(get_db)):
     slot = db.get(LineupSlot, slot_id)
     if not slot or slot.lineup_id != lineup_id:
         raise HTTPException(status_code=404, detail="Slot not found")
+    lineup = db.get(Lineup, lineup_id)
     db.delete(slot)
+    db.flush()
+    # Compact batting orders using two-phase to avoid unique-constraint conflicts.
+    # Before deletion there were n+1 slots with max batting_order = n+1, so
+    # temporary values must start at n+2 to clear the existing range.
+    remaining = sorted(lineup.slots, key=lambda s: s.batting_order)
+    n = len(remaining)
+    for i, s in enumerate(remaining):
+        s.batting_order = n + 2 + i
+    db.flush()
+    for i, s in enumerate(remaining):
+        s.batting_order = i + 1
     db.commit()
+    db.refresh(lineup)
+    return lineup
