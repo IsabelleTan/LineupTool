@@ -181,14 +181,9 @@ export default function GameDetailPage() {
         <Button variant="ghost" onClick={() => navigate('/games')}>
           ← Games
         </Button>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setPrintOpen(true)}>
-            Preview
-          </Button>
-          <Button variant="outline" onClick={() => setDialogOpen(true)}>
-            Edit Game
-          </Button>
-        </div>
+        <Button variant="outline" onClick={() => setDialogOpen(true)}>
+          Edit Game
+        </Button>
       </div>
 
       <div className="space-y-1">
@@ -231,7 +226,12 @@ export default function GameDetailPage() {
         </div>
 
         <div>
-          <h2 className="text-lg font-medium mb-2">Lineup</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-medium">Lineup</h2>
+            <Button variant="outline" size="sm" onClick={() => setPrintOpen(true)}>
+              Print Preview
+            </Button>
+          </div>
           <DiamondView
             availablePlayers={availablePlayers}
             slots={lineup?.slots ?? []}
