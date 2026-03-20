@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import type { Game } from '@/api/games'
 import type { LineupSlotRead } from '@/api/lineups'
 import type { Player } from '@/api/players'
@@ -13,6 +15,13 @@ interface Props {
 
 export default function LineupPrintView({ game, slots, players, availablePlayers, onClose }: Props) {
   const ordered = [...slots].sort((a, b) => a.batting_order - b.batting_order)
+
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.textContent = '@media print { #root { display: none !important; } }'
+    document.head.appendChild(style)
+    return () => style.remove()
+  }, [])
   const assignedIds = new Set(slots.map((s) => s.player_id))
   const bench = availablePlayers.filter((p) => !assignedIds.has(p.id))
 
@@ -20,7 +29,7 @@ export default function LineupPrintView({ game, slots, players, availablePlayers
     return players.find((p) => p.id === playerId)
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 bg-white overflow-auto print:static print:overflow-visible">
       <div className="max-w-2xl mx-auto p-8">
         {/* Close button — hidden when printing */}
@@ -102,6 +111,7 @@ export default function LineupPrintView({ game, slots, players, availablePlayers
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

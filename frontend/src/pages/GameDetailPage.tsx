@@ -183,7 +183,7 @@ export default function GameDetailPage() {
         </Button>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setPrintOpen(true)}>
-            Print
+            Preview
           </Button>
           <Button variant="outline" onClick={() => setDialogOpen(true)}>
             Edit Game
