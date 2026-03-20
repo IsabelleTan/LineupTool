@@ -12,16 +12,15 @@ import {
   type GameCreate,
 } from '@/api/games'
 
-type Filter = 'upcoming' | 'past'
-
-function filterAndSort(games: Game[], filter: Filter): Game[] {
+function splitGames(games: Game[]): { upcoming: Game[]; past: Game[] } {
   const today = new Date().toISOString().slice(0, 10)
-  const filtered = games.filter((g) => {
-    const isPast = g.status !== 'scheduled' || g.game_date < today
-    return filter === 'past' ? isPast : !isPast
-  })
-  filtered.sort((a, b) => a.game_date.localeCompare(b.game_date))
-  return filtered
+  const upcoming = games
+    .filter((g) => g.game_date >= today)
+    .sort((a, b) => a.game_date.localeCompare(b.game_date))
+  const past = games
+    .filter((g) => g.game_date < today)
+    .sort((a, b) => b.game_date.localeCompare(a.game_date))
+  return { upcoming, past }
 }
 
 export default function GamesPage() {
@@ -29,7 +28,6 @@ export default function GamesPage() {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [filter, setFilter] = useState<Filter>('upcoming')
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingGame, setEditingGame] = useState<Game | undefined>()
@@ -75,40 +73,44 @@ export default function GamesPage() {
     await load()
   }
 
-  const visibleGames = filterAndSort(games, filter)
+  const { upcoming, past } = splitGames(games)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Games</h1>
         <Button onClick={openAdd}>Add Game</Button>
       </div>
 
-      <div className="flex gap-1 border rounded-md w-fit p-1">
-        {(['upcoming', 'past'] as Filter[]).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1 rounded text-sm capitalize transition-colors ${
-              filter === f
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-
       {loading && <p className="text-muted-foreground">Loading…</p>}
       {error && <p className="text-destructive">{error}</p>}
       {!loading && !error && (
-        <GameTable
-          games={visibleGames}
-          onView={(g) => navigate(`/games/${g.id}`)}
-          onEdit={openEdit}
-          onDelete={(g) => void handleDelete(g)}
-        />
+        <>
+          <section className="space-y-2">
+            <h2 className="text-lg font-medium">Upcoming Games</h2>
+            {upcoming.length === 0
+              ? <p className="text-muted-foreground text-sm">No upcoming games.</p>
+              : <GameTable
+                  games={upcoming}
+                  onView={(g) => navigate(`/games/${g.id}`)}
+                  onEdit={openEdit}
+                  onDelete={(g) => void handleDelete(g)}
+                />
+            }
+          </section>
+          <section className="space-y-2">
+            <h2 className="text-lg font-medium">Past Games</h2>
+            {past.length === 0
+              ? <p className="text-muted-foreground text-sm">No past games.</p>
+              : <GameTable
+                  games={past}
+                  onView={(g) => navigate(`/games/${g.id}`)}
+                  onEdit={openEdit}
+                  onDelete={(g) => void handleDelete(g)}
+                />
+            }
+          </section>
+        </>
       )}
 
       <GameDialog
