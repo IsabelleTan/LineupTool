@@ -86,11 +86,16 @@ def main():
         for data in GAMES:
             exists = (
                 db.query(Game)
-                .filter(Game.game_date == data["game_date"], Game.opponent == data["opponent"])
+                .filter(
+                    Game.game_date == data["game_date"],
+                    Game.opponent == data["opponent"],
+                )
                 .first()
             )
             if exists:
-                print(f"  skip (already exists): {data['opponent']} on {data['game_date']}")
+                print(
+                    f"  skip (already exists): {data['opponent']} on {data['game_date']}"
+                )
                 continue
             db.add(Game(**data))
             added += 1
