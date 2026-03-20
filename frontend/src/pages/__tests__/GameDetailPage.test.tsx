@@ -110,7 +110,7 @@ beforeEach(() => {
     created_at: '2024-01-01T00:00:00',
     updated_at: '2024-01-01T00:00:00',
   })
-  vi.mocked(deleteSlot).mockResolvedValue(undefined)
+  vi.mocked(deleteSlot).mockResolvedValue(lineupWithSlots)
   vi.mocked(reorderSlots).mockResolvedValue(lineupWithSlots)
   vi.mocked(updateSlot).mockResolvedValue({
     id: 1,
@@ -256,7 +256,7 @@ describe('GameDetailPage', () => {
     })
   })
 
-  it('onUnassign calls deleteSlot then re-sequences via updateSlot', async () => {
+  it('onUnassign calls deleteSlot and uses the returned lineup', async () => {
     vi.mocked(getAvailability).mockResolvedValue([availabilityRecord])
     const slotSS = {
       id: 1,
@@ -267,13 +267,10 @@ describe('GameDetailPage', () => {
       created_at: '2024-01-01T00:00:00',
       updated_at: '2024-01-01T00:00:00',
     }
-    vi.mocked(getLineup)
-      .mockResolvedValueOnce({ ...lineupWithSlots, slots: [slotSS] }) // initial load
-      .mockResolvedValueOnce({ ...lineupWithSlots, slots: [] })       // after delete
-      .mockResolvedValueOnce({ ...lineupWithSlots, slots: [] })       // final refresh
+    vi.mocked(getLineup).mockResolvedValueOnce({ ...lineupWithSlots, slots: [slotSS] })
+    vi.mocked(deleteSlot).mockResolvedValue({ ...lineupWithSlots, slots: [] })
     renderPage()
     await waitFor(() => screen.getByRole('button', { name: 'Alice' }))
-    // Click the blue assigned card
     const blueBtn = screen.getByRole('button', { name: 'Alice' })
     await userEvent.click(blueBtn)
     await waitFor(() => {
