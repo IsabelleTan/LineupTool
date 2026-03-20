@@ -192,14 +192,22 @@ export default function GameDetailPage() {
             <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Home</Badge>
           ) : (
             <Badge variant="secondary">Away</Badge>
-          )}{' '}
-          · {game.status.charAt(0).toUpperCase() + game.status.slice(1)}
+          )}
         </p>
         {game.location && <p className="text-muted-foreground">{game.location}</p>}
       </div>
 
       {mutationError && (
-        <p className="text-destructive text-sm">{mutationError}</p>
+        <div className="flex items-center gap-2 text-destructive text-sm">
+          <span>{mutationError}</span>
+          <button
+            onClick={() => setMutationError(null)}
+            className="text-destructive hover:opacity-70 font-medium"
+            aria-label="Dismiss error"
+          >
+            ×
+          </button>
+        </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-4 items-start">
@@ -231,6 +239,7 @@ export default function GameDetailPage() {
           <LineupOrder
             slots={lineup?.slots ?? []}
             players={players}
+            availablePlayers={availablePlayers}
             onReorder={(ids) => void handleReorder(ids)}
           />
         </div>

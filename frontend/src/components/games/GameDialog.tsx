@@ -24,7 +24,6 @@ interface FormState {
   opponent: string
   location: string
   is_home: boolean
-  status: 'scheduled' | 'completed' | 'cancelled'
 }
 
 function toFormState(game?: Game): FormState {
@@ -33,7 +32,6 @@ function toFormState(game?: Game): FormState {
     opponent: game?.opponent ?? '',
     location: game?.location ?? '',
     is_home: game?.is_home ?? true,
-    status: game?.status ?? 'scheduled',
   }
 }
 
@@ -64,7 +62,6 @@ export default function GameDialog({ open, onClose, onSubmit, game }: Props) {
         opponent: form.opponent.trim(),
         location: form.location.trim() || null,
         is_home: form.is_home,
-        status: form.status,
       })
       onClose()
     } catch (err) {
@@ -124,20 +121,6 @@ export default function GameDialog({ open, onClose, onSubmit, game }: Props) {
               }
             />
             <Label htmlFor="is_home">Home game</Label>
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="status">Status</Label>
-            <select
-              id="status"
-              name="status"
-              value={form.status}
-              onChange={handleChange}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="scheduled">Scheduled</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>

@@ -44,7 +44,6 @@ const game: Game = {
   opponent: 'Red Sox',
   location: 'Fenway Park',
   is_home: false,
-  status: 'scheduled',
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -53,7 +52,7 @@ const player: Player = {
   id: 10,
   name: 'Alice',
   jersey_number: '7',
-  preferred_position: 'SS',
+  license_number: null,
   capable_positions: ['SS'],
   is_active: true,
   created_at: '2024-01-01T00:00:00',
@@ -238,8 +237,8 @@ describe('GameDetailPage', () => {
   it('diamond position labels visible after load', async () => {
     renderPage()
     await waitFor(() => screen.getByText(/vs Red Sox/i))
-    expect(screen.getByText('SS')).toBeInTheDocument()
-    expect(screen.getByText('CF')).toBeInTheDocument()
+    expect(screen.getAllByText('SS').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('CF').length).toBeGreaterThan(0)
   })
 
   it('onAssign calls createSlot then getLineup', async () => {

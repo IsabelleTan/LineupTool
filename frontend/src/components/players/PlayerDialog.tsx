@@ -22,7 +22,7 @@ interface Props {
 interface FormState {
   name: string
   jersey_number: string
-  preferred_position: string
+  license_number: string
   capable_positions: string
   is_active: boolean
 }
@@ -31,7 +31,7 @@ function toFormState(player?: Player): FormState {
   return {
     name: player?.name ?? '',
     jersey_number: player?.jersey_number ?? '',
-    preferred_position: player?.preferred_position ?? '',
+    license_number: player?.license_number ?? '',
     capable_positions: player?.capable_positions?.join(', ') ?? '',
     is_active: player?.is_active ?? true,
   }
@@ -66,7 +66,7 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
       await onSubmit({
         name: form.name.trim(),
         jersey_number: form.jersey_number.trim() || null,
-        preferred_position: form.preferred_position.trim() || null,
+        license_number: form.license_number.trim() || null,
         capable_positions: positions.length ? positions : null,
         is_active: form.is_active,
       })
@@ -109,13 +109,15 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="preferred_position">Preferred Position</Label>
+            <Label htmlFor="license_number">License #</Label>
             <Input
-              id="preferred_position"
-              name="preferred_position"
-              value={form.preferred_position}
+              id="license_number"
+              name="license_number"
+              value={form.license_number}
               onChange={handleChange}
-              placeholder="e.g. SS"
+              placeholder="e.g. 123456"
+              inputMode="numeric"
+              pattern="[0-9]*"
             />
           </div>
           <div className="space-y-1">

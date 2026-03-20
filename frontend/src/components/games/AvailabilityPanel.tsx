@@ -10,12 +10,10 @@ interface Props {
 }
 
 function PlayerHint({ player }: { player: Player }) {
-  const hint = player.jersey_number != null
-    ? `#${player.jersey_number}`
-    : player.preferred_position ?? null
+  if (player.jersey_number == null) return null
   return (
     <span className="text-muted-foreground text-xs ml-1">
-      {hint}
+      #{player.jersey_number}
     </span>
   )
 }

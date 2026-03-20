@@ -3,7 +3,6 @@ def test_create_and_get_game(client):
     assert r.status_code == 201
     data = r.json()
     assert data["opponent"] == "Tigers"
-    assert data["status"] == "scheduled"
     assert data["is_home"] is True
 
     r2 = client.get(f"/games/{data['id']}")
@@ -18,13 +17,13 @@ def test_list_games(client):
     assert any(g["opponent"] == "Bears" for g in r.json())
 
 
-def test_update_game_status(client):
+def test_update_game_opponent(client):
     r = client.post("/games/", json={"game_date": "2026-08-01", "opponent": "Lions"})
     gid = r.json()["id"]
 
-    r2 = client.patch(f"/games/{gid}", json={"status": "completed"})
+    r2 = client.patch(f"/games/{gid}", json={"opponent": "Tigers"})
     assert r2.status_code == 200
-    assert r2.json()["status"] == "completed"
+    assert r2.json()["opponent"] == "Tigers"
 
 
 def test_delete_game(client):
@@ -40,5 +39,5 @@ def test_get_game_not_found(client):
 
 
 def test_update_game_not_found(client):
-    r = client.patch("/games/99999", json={"status": "completed"})
+    r = client.patch("/games/99999", json={"opponent": "Wolves"})
     assert r.status_code == 404

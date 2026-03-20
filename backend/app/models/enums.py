@@ -14,9 +14,3 @@ class FieldingPosition(str, enum.Enum):
     DH = "DH"
     EH = "EH"
     BENCH = "BENCH"
-
-
-class GameStatus(str, enum.Enum):
-    SCHEDULED = "scheduled"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
