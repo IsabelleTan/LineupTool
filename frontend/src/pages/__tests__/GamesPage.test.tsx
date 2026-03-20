@@ -26,7 +26,7 @@ const game1: Game = {
 
 const game2: Game = {
   id: 2,
-  game_date: '2026-07-04',
+  game_date: '2024-07-04',
   opponent: 'Yankees',
   location: null,
   is_home: true,
@@ -46,23 +46,13 @@ describe('GamesPage', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument()
   })
 
-  it('renders upcoming games by default (scheduled + future date)', async () => {
-    render(<MemoryRouter><GamesPage /></MemoryRouter>)
-    await waitFor(() => {
-      expect(screen.getByText('Red Sox')).toBeInTheDocument()
-    })
-    // game2 is completed → shown on Past tab, not Upcoming
-    expect(screen.queryByText('Yankees')).not.toBeInTheDocument()
-  })
-
-  it('past tab shows completed/cancelled games', async () => {
+  it('shows future games under Upcoming Games and past games under Past Games', async () => {
     render(<MemoryRouter><GamesPage /></MemoryRouter>)
     await waitFor(() => screen.getByText('Red Sox'))
-    await userEvent.click(screen.getByRole('button', { name: /past/i }))
-    await waitFor(() => {
-      expect(screen.getByText('Yankees')).toBeInTheDocument()
-    })
-    expect(screen.queryByText('Red Sox')).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Upcoming Games' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Past Games' })).toBeInTheDocument()
+    expect(screen.getByText('Red Sox')).toBeInTheDocument()
+    expect(screen.getByText('Yankees')).toBeInTheDocument()
   })
 
   it('"Add Game" button opens the dialog', async () => {
