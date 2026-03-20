@@ -226,12 +226,7 @@ export default function GameDetailPage() {
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-medium">Lineup</h2>
-            <Button variant="outline" size="sm" onClick={() => setPrintOpen(true)}>
-              Print Preview
-            </Button>
-          </div>
+          <h2 className="text-lg font-medium mb-2">Lineup</h2>
           <DiamondView
             availablePlayers={availablePlayers}
             slots={lineup?.slots ?? []}
@@ -242,7 +237,12 @@ export default function GameDetailPage() {
         </div>
 
         <div>
-          <h2 className="text-lg font-medium mb-2">Batting Order</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-medium">Batting Order</h2>
+            <Button variant="outline" size="sm" onClick={() => setPrintOpen(true)}>
+              Print Preview
+            </Button>
+          </div>
           <LineupOrder
             slots={lineup?.slots ?? []}
             players={players}
