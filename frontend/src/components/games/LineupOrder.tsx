@@ -20,6 +20,7 @@ import type { Player } from '@/api/players'
 interface Props {
   slots: LineupSlotRead[]
   players: Player[]
+  availablePlayers: Player[]
   onReorder?: (orderedSlotIds: number[]) => void
 }
 
@@ -27,9 +28,10 @@ interface RowProps {
   slot: LineupSlotRead
   index: number
   name: string
+  isOutOfPosition: boolean
 }
 
-function SortableRow({ slot, index, name }: RowProps) {
+function SortableRow({ slot, index, name, isOutOfPosition }: RowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: slot.id })
   const style = {
@@ -47,19 +49,25 @@ function SortableRow({ slot, index, name }: RowProps) {
       role="row"
     >
       <td className="py-1">{index + 1}. {name}</td>
-      <td className="py-1 pl-3 text-muted-foreground">{slot.fielding_position}</td>
+      <td className={`py-1 pl-3 ${isOutOfPosition ? 'text-amber-600' : 'text-muted-foreground'}`}>
+        {slot.fielding_position}
+      </td>
     </tr>
   )
 }
 
-export default function LineupOrder({ slots, players, onReorder }: Props) {
+export default function LineupOrder({ slots, players, availablePlayers, onReorder }: Props) {
   const sensors = useSensors(useSensor(PointerSensor))
   const sorted = useMemo(
     () => [...slots].sort((a, b) => a.batting_order - b.batting_order),
     [slots],
   )
+  const benchPlayers = useMemo(
+    () => availablePlayers.filter((p) => !slots.some((s) => s.player_id === p.id)),
+    [availablePlayers, slots],
+  )
 
-  if (slots.length === 0) {
+  if (slots.length === 0 && benchPlayers.length === 0) {
     return <p className="text-muted-foreground text-sm">No players assigned yet.</p>
   }
 
@@ -73,23 +81,44 @@ export default function LineupOrder({ slots, players, onReorder }: Props) {
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={sorted.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-xs text-muted-foreground border-b">
-              <th className="text-left font-medium pb-1">Player</th>
-              <th className="text-left font-medium pb-1 pl-3">Pos</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((slot, idx) => {
-              const name = players.find((p) => p.id === slot.player_id)?.name ?? 'Unknown'
-              return <SortableRow key={slot.id} slot={slot} index={idx} name={name} />
-            })}
-          </tbody>
-        </table>
-      </SortableContext>
-    </DndContext>
+    <>
+      {slots.length > 0 && (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={sorted.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-xs text-muted-foreground border-b">
+                  <th className="text-left font-medium pb-1">Player</th>
+                  <th className="text-left font-medium pb-1 pl-3">Pos</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((slot, idx) => {
+                  const player = players.find((p) => p.id === slot.player_id)
+                  const name = player?.name ?? 'Unknown'
+                  const isOutOfPosition = !!player && !player.capable_positions?.includes(slot.fielding_position)
+                  return <SortableRow key={slot.id} slot={slot} index={idx} name={name} isOutOfPosition={isOutOfPosition} />
+                })}
+              </tbody>
+            </table>
+          </SortableContext>
+        </DndContext>
+      )}
+      {benchPlayers.length > 0 && (
+        <div className="mt-4">
+          <p className="text-xs text-muted-foreground font-medium border-b pb-1 mb-1">Bench</p>
+          <ul className="text-sm space-y-1">
+            {benchPlayers.map((p) => (
+              <li key={p.id} className="text-muted-foreground">
+                {p.name}
+                {p.capable_positions && p.capable_positions.length > 0 && (
+                  <span className="text-xs ml-1 opacity-60">{p.capable_positions.join(', ')}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
   )
 }

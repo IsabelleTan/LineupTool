@@ -3,15 +3,12 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from app.models.enums import GameStatus
-
 
 class GameCreate(BaseModel):
     game_date: date
     opponent: str
     location: Optional[str] = None
     is_home: bool = True
-    status: GameStatus = GameStatus.SCHEDULED
 
 
 class GameUpdate(BaseModel):
@@ -19,7 +16,6 @@ class GameUpdate(BaseModel):
     opponent: Optional[str] = None
     location: Optional[str] = None
     is_home: Optional[bool] = None
-    status: Optional[GameStatus] = None
 
 
 class GameRead(BaseModel):
@@ -28,7 +24,6 @@ class GameRead(BaseModel):
     opponent: str
     location: Optional[str]
     is_home: bool
-    status: GameStatus
     created_at: datetime
     updated_at: datetime
 

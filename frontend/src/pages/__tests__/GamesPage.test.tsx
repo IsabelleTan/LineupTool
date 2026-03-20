@@ -20,18 +20,16 @@ const game1: Game = {
   opponent: 'Red Sox',
   location: 'Fenway Park',
   is_home: false,
-  status: 'scheduled',
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
 
 const game2: Game = {
   id: 2,
-  game_date: '2026-07-04',
+  game_date: '2024-07-04',
   opponent: 'Yankees',
   location: null,
   is_home: true,
-  status: 'completed',
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -48,12 +46,13 @@ describe('GamesPage', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument()
   })
 
-  it('renders game rows after data loads', async () => {
+  it('shows future games under Upcoming Games and past games under Past Games', async () => {
     render(<MemoryRouter><GamesPage /></MemoryRouter>)
-    await waitFor(() => {
-      expect(screen.getByText('Red Sox')).toBeInTheDocument()
-      expect(screen.getByText('Yankees')).toBeInTheDocument()
-    })
+    await waitFor(() => screen.getByText('Red Sox'))
+    expect(screen.getByRole('heading', { name: 'Upcoming Games' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Past Games' })).toBeInTheDocument()
+    expect(screen.getByText('Red Sox')).toBeInTheDocument()
+    expect(screen.getByText('Yankees')).toBeInTheDocument()
   })
 
   it('"Add Game" button opens the dialog', async () => {

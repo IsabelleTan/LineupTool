@@ -10,7 +10,6 @@ const game1: Game = {
   opponent: 'Red Sox',
   location: 'Fenway Park',
   is_home: false,
-  status: 'scheduled',
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -21,7 +20,6 @@ const game2: Game = {
   opponent: 'Yankees',
   location: null,
   is_home: true,
-  status: 'completed',
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -41,14 +39,6 @@ describe('GameTable', () => {
   it('shows — when location is null', () => {
     render(<GameTable games={[game2]} onView={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />)
     expect(screen.getByText('—')).toBeInTheDocument()
-  })
-
-  it('renders correct status badge text for all statuses', () => {
-    const cancelled: Game = { ...game1, id: 3, status: 'cancelled' }
-    render(<GameTable games={[game1, game2, cancelled]} onView={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />)
-    expect(screen.getByText('Scheduled')).toBeInTheDocument()
-    expect(screen.getByText('Completed')).toBeInTheDocument()
-    expect(screen.getByText('Cancelled')).toBeInTheDocument()
   })
 
   it('renders Home badge for home games and Away for away games', () => {

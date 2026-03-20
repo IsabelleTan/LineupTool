@@ -102,6 +102,22 @@ poetry run pytest tests/ -v
 
 Tests use an in-memory database so they don't touch your local `lineup.db`.
 
+### Seeding dummy data
+
+Two scripts create realistic dummy data so you can develop against a populated database:
+
+```bash
+cd backend
+
+# Add 10 players with names, jersey numbers, and positions
+poetry run python seed_players.py
+
+# Add 10 games (5 past, 5 upcoming) with opponents and locations
+poetry run python seed_games.py
+```
+
+Both scripts are idempotent — running them again skips records that already exist.
+
 ---
 
 ## Frontend

@@ -70,8 +70,11 @@ export function updateSlot(
   })
 }
 
-export function deleteSlot(lineupId: number, slotId: number): Promise<void> {
-  return apiFetch<void>(`/lineups/${lineupId}/slots/${slotId}`, {
+export function deleteSlot(
+  lineupId: number,
+  slotId: number,
+): Promise<LineupReadWithSlots> {
+  return apiFetch<LineupReadWithSlots>(`/lineups/${lineupId}/slots/${slotId}`, {
     method: 'DELETE',
   })
 }

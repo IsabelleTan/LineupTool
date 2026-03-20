@@ -19,11 +19,11 @@ beforeEach(() => {
 })
 
 describe('apiFetch', () => {
-  it('prepends base URL and sends JSON Content-Type header', async () => {
+  it('uses relative URL and sends JSON Content-Type header', async () => {
     mockFetch.mockResolvedValue(makeResponse({ id: 1 }))
     await apiFetch('/players/')
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:8000/players/',
+      '/players/',
       expect.objectContaining({
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
       }),
@@ -52,7 +52,7 @@ describe('apiFetch', () => {
     mockFetch.mockResolvedValue(makeResponse({ id: 2 }))
     await apiFetch('/players/', { method: 'POST', body: '{"name":"Bob"}' })
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:8000/players/',
+      '/players/',
       expect.objectContaining({ method: 'POST', body: '{"name":"Bob"}' }),
     )
   })

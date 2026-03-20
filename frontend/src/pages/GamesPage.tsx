@@ -12,6 +12,17 @@ import {
   type GameCreate,
 } from '@/api/games'
 
+function splitGames(games: Game[]): { upcoming: Game[]; past: Game[] } {
+  const today = new Date().toISOString().slice(0, 10)
+  const upcoming = games
+    .filter((g) => g.game_date >= today)
+    .sort((a, b) => a.game_date.localeCompare(b.game_date))
+  const past = games
+    .filter((g) => g.game_date < today)
+    .sort((a, b) => b.game_date.localeCompare(a.game_date))
+  return { upcoming, past }
+}
+
 export default function GamesPage() {
   const navigate = useNavigate()
   const [games, setGames] = useState<Game[]>([])
@@ -62,8 +73,10 @@ export default function GamesPage() {
     await load()
   }
 
+  const { upcoming, past } = splitGames(games)
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Games</h1>
         <Button onClick={openAdd}>Add Game</Button>
@@ -72,12 +85,32 @@ export default function GamesPage() {
       {loading && <p className="text-muted-foreground">Loading…</p>}
       {error && <p className="text-destructive">{error}</p>}
       {!loading && !error && (
-        <GameTable
-          games={games}
-          onView={(g) => navigate(`/games/${g.id}`)}
-          onEdit={openEdit}
-          onDelete={(g) => void handleDelete(g)}
-        />
+        <>
+          <section className="space-y-2">
+            <h2 className="text-lg font-medium">Upcoming Games</h2>
+            {upcoming.length === 0
+              ? <p className="text-muted-foreground text-sm">No upcoming games.</p>
+              : <GameTable
+                  games={upcoming}
+                  onView={(g) => navigate(`/games/${g.id}`)}
+                  onEdit={openEdit}
+                  onDelete={(g) => void handleDelete(g)}
+                />
+            }
+          </section>
+          <section className="space-y-2">
+            <h2 className="text-lg font-medium">Past Games</h2>
+            {past.length === 0
+              ? <p className="text-muted-foreground text-sm">No past games.</p>
+              : <GameTable
+                  games={past}
+                  onView={(g) => navigate(`/games/${g.id}`)}
+                  onEdit={openEdit}
+                  onDelete={(g) => void handleDelete(g)}
+                />
+            }
+          </section>
+        </>
       )}
 
       <GameDialog
