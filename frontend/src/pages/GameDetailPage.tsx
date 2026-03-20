@@ -264,6 +264,7 @@ export default function GameDetailPage() {
           game={game}
           slots={lineup?.slots ?? []}
           players={players}
+          availablePlayers={availablePlayers}
           onClose={() => setPrintOpen(false)}
         />
       )}

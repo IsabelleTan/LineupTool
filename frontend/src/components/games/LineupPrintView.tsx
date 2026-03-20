@@ -7,14 +7,17 @@ interface Props {
   game: Game
   slots: LineupSlotRead[]
   players: Player[]
+  availablePlayers: Player[]
   onClose: () => void
 }
 
-export default function LineupPrintView({ game, slots, players, onClose }: Props) {
+export default function LineupPrintView({ game, slots, players, availablePlayers, onClose }: Props) {
   const ordered = [...slots].sort((a, b) => a.batting_order - b.batting_order)
+  const assignedIds = new Set(slots.map((s) => s.player_id))
+  const bench = availablePlayers.filter((p) => !assignedIds.has(p.id))
 
-  function playerName(playerId: number) {
-    return players.find((p) => p.id === playerId)?.name ?? '—'
+  function player(playerId: number) {
+    return players.find((p) => p.id === playerId)
   }
 
   return (
@@ -56,19 +59,47 @@ export default function LineupPrintView({ game, slots, players, onClose }: Props
               <tr className="border-b-2 border-gray-300">
                 <th className="text-left py-2 pr-4 w-8">#</th>
                 <th className="text-left py-2 pr-4">Player</th>
+                <th className="text-left py-2 pr-4">License</th>
                 <th className="text-left py-2">Position</th>
               </tr>
             </thead>
             <tbody>
-              {ordered.map((slot) => (
-                <tr key={slot.id} className="border-b border-gray-100">
-                  <td className="py-2 pr-4 text-gray-500">{slot.batting_order}</td>
-                  <td className="py-2 pr-4 font-medium">{playerName(slot.player_id)}</td>
-                  <td className="py-2 text-gray-600">{slot.fielding_position}</td>
-                </tr>
-              ))}
+              {ordered.map((slot) => {
+                const p = player(slot.player_id)
+                return (
+                  <tr key={slot.id} className="border-b border-gray-100">
+                    <td className="py-2 pr-4 text-gray-500">{slot.batting_order}</td>
+                    <td className="py-2 pr-4 font-medium">{p?.name ?? '—'}</td>
+                    <td className="py-2 pr-4 text-gray-500">{p?.license_number ?? '—'}</td>
+                    <td className="py-2 text-gray-600">{slot.fielding_position}</td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
+        )}
+
+        {/* Bench */}
+        {bench.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">Bench</h2>
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="border-b-2 border-gray-300">
+                  <th className="text-left py-2 pr-4">Player</th>
+                  <th className="text-left py-2">License</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bench.map((p) => (
+                  <tr key={p.id} className="border-b border-gray-100">
+                    <td className="py-2 pr-4 font-medium">{p.name}</td>
+                    <td className="py-2 text-gray-500">{p.license_number ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
