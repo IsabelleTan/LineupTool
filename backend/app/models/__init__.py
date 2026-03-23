@@ -1,5 +1,5 @@
 from .base import Base, TimestampMixin
-from .enums import FieldingPosition
+from .enums import FieldingPosition, PlayerRole, PlayerStatus
 from .game import Game
 from .game_availability import GameAvailability
 from .lineup import Lineup
@@ -10,6 +10,8 @@ __all__ = [
     "Base",
     "TimestampMixin",
     "FieldingPosition",
+    "PlayerRole",
+    "PlayerStatus",
     "Player",
     "Game",
     "GameAvailability",

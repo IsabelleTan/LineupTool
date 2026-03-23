@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import JSON, Boolean, String
+from sqlalchemy import JSON, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, TimestampMixin
@@ -14,7 +14,8 @@ class Player(Base, TimestampMixin):
     jersey_number: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     license_number: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     capable_positions: Mapped[Optional[list[str]]] = mapped_column(JSON, nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    role: Mapped[str] = mapped_column(String, nullable=False, default="Player")
+    status: Mapped[str] = mapped_column(String, nullable=False, default="Active")
 
     availabilities: Mapped[list["GameAvailability"]] = relationship(  # noqa: F821
         "GameAvailability", back_populates="player"

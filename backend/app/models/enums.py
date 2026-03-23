@@ -1,6 +1,17 @@
 import enum
 
 
+class PlayerRole(str, enum.Enum):
+    PLAYER = "Player"
+    STAFF = "Staff"
+
+
+class PlayerStatus(str, enum.Enum):
+    ACTIVE = "Active"
+    INACTIVE = "Inactive"
+    INJURED = "Injured"
+
+
 class FieldingPosition(str, enum.Enum):
     P = "P"
     C = "C"
