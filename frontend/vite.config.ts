@@ -15,6 +15,7 @@ export default defineConfig({
       '/players': 'http://localhost:8000',
       '/games':   'http://localhost:8000',
       '/lineups': 'http://localhost:8000',
+      '/import':  'http://localhost:8000',
     },
   },
 })
