@@ -33,32 +33,49 @@ export default function GameTable({ games, onView, onEdit, onDelete }: Props) {
           <TableHead>Opponent</TableHead>
           <TableHead>Location</TableHead>
           <TableHead>Home/Away</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead />
         </TableRow>
       </TableHeader>
       <TableBody>
         {games.map((game) => (
-          <TableRow key={game.id}>
-            <TableCell>
-              {formatDate(game.game_date)}
-            </TableCell>
+          <TableRow
+            key={game.id}
+            className="group cursor-pointer"
+            onClick={() => onView(game)}
+          >
+            <TableCell>{formatDate(game.game_date)}</TableCell>
             <TableCell className="font-medium">{game.opponent}</TableCell>
             <TableCell className="text-muted-foreground">{game.location ?? '—'}</TableCell>
             <TableCell>
               {game.is_home ? (
-                <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Home</Badge>
+                <Badge className="bg-blue-100 text-blue-800">Home</Badge>
               ) : (
                 <Badge variant="secondary">Away</Badge>
               )}
             </TableCell>
             <TableCell className="text-right space-x-2">
-              <Button size="sm" variant="outline" onClick={() => onView(game)}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => { e.stopPropagation(); onView(game) }}
+              >
                 View
               </Button>
-              <Button size="sm" variant="outline" onClick={() => onEdit(game)}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => { e.stopPropagation(); onEdit(game) }}
+              >
                 Edit
               </Button>
-              <Button size="sm" variant="destructive" onClick={() => onDelete(game)}>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => { e.stopPropagation(); onDelete(game) }}
+              >
                 Delete
               </Button>
             </TableCell>

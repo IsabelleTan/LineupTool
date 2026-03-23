@@ -50,9 +50,14 @@ const slot2: LineupSlotRead = {
 }
 
 describe('LineupOrder', () => {
-  it('shows empty state when no slots', () => {
+  it('shows empty state when no slots and no available players', () => {
     render(<LineupOrder slots={[]} players={players} availablePlayers={[]} />)
-    expect(screen.getByText('No players assigned yet.')).toBeInTheDocument()
+    expect(screen.getByText('Mark players available, then assign them from the diamond.')).toBeInTheDocument()
+  })
+
+  it('shows batting order prompt when slots empty but bench players exist', () => {
+    render(<LineupOrder slots={[]} players={players} availablePlayers={[players[0]]} />)
+    expect(screen.getByText('Assign players from the diamond to build the batting order.')).toBeInTheDocument()
   })
 
   it('renders one row per slot', () => {
@@ -146,7 +151,7 @@ describe('LineupOrder', () => {
 
     it('shows empty state when slots empty and no available players', () => {
       render(<LineupOrder slots={[]} players={players} availablePlayers={[]} />)
-      expect(screen.getByText('No players assigned yet.')).toBeInTheDocument()
+      expect(screen.getByText('Mark players available, then assign them from the diamond.')).toBeInTheDocument()
     })
 
     it('shows capable positions next to bench player name', () => {

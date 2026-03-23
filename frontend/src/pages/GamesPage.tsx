@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import GameTable from '@/components/games/GameTable'
 import GameDialog from '@/components/games/GameDialog'
+import { useToast, Toast } from '@/lib/toast'
 import {
   getGames,
   createGame,
@@ -31,6 +32,7 @@ export default function GamesPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingGame, setEditingGame] = useState<Game | undefined>()
+  const { toastMessage, showToast } = useToast()
 
   async function load() {
     setLoading(true)
@@ -61,8 +63,10 @@ export default function GamesPage() {
   async function handleSubmit(data: GameCreate) {
     if (editingGame) {
       await updateGame(editingGame.id, data)
+      showToast('Game saved')
     } else {
       await createGame(data)
+      showToast('Game added')
     }
     await load()
   }
@@ -119,6 +123,7 @@ export default function GamesPage() {
         onSubmit={handleSubmit}
         game={editingGame}
       />
+      <Toast message={toastMessage} />
     </div>
   )
 }
