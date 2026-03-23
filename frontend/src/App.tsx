@@ -2,6 +2,7 @@ import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import PlayersPage from './pages/PlayersPage'
 import GamesPage from './pages/GamesPage'
 import GameDetailPage from './pages/GameDetailPage'
+import ImportPage from './pages/ImportPage'
 
 function Nav() {
   return (
@@ -23,6 +24,14 @@ function Nav() {
       >
         Games
       </NavLink>
+      <NavLink
+        to="/import"
+        className={({ isActive }) =>
+          isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'
+        }
+      >
+        Import
+      </NavLink>
     </nav>
   )
 }
@@ -37,6 +46,7 @@ export default function App() {
           <Route path="/players" element={<PlayersPage />} />
           <Route path="/games" element={<GamesPage />} />
           <Route path="/games/:id" element={<GameDetailPage />} />
+          <Route path="/import" element={<ImportPage />} />
         </Routes>
       </main>
     </div>

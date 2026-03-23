@@ -23,8 +23,9 @@ export function formatDate(dateStr: string): string {
   })
 }
 
-// No record → available by default; only an explicit false makes a player unavailable.
+// Only an explicit is_available=true record counts as available.
+// No record (hasn't replied) or is_available=false → not available.
 export function isPlayerAvailable(player: Player, availability: GameAvailability[]): boolean {
   const record = availability.find((a) => a.player_id === player.id)
-  return !record || record.is_available === true
+  return record?.is_available === true
 }
