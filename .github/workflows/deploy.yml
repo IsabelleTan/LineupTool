@@ -16,7 +16,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e
-            cd /srv/lineuptool
+            cd /var/www/lineuptool
             git pull
 
             cd frontend
