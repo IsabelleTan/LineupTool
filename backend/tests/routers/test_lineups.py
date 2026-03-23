@@ -85,7 +85,9 @@ def test_update_slot(client, game, player):
         json={"player_id": player["id"], "batting_order": 1, "fielding_position": "CF"},
     ).json()["id"]
 
-    r = client.patch(f"/api/lineups/{lid}/slots/{sid}", json={"fielding_position": "SS"})
+    r = client.patch(
+        f"/api/lineups/{lid}/slots/{sid}", json={"fielding_position": "SS"}
+    )
     assert r.status_code == 200
     assert r.json()["fielding_position"] == "SS"
 

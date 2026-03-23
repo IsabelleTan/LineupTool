@@ -23,7 +23,7 @@ describe('apiFetch', () => {
     mockFetch.mockResolvedValue(makeResponse({ id: 1 }))
     await apiFetch('/players/')
     expect(mockFetch).toHaveBeenCalledWith(
-      '/players/',
+      '/api/players/',
       expect.objectContaining({
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
       }),
@@ -52,7 +52,7 @@ describe('apiFetch', () => {
     mockFetch.mockResolvedValue(makeResponse({ id: 2 }))
     await apiFetch('/players/', { method: 'POST', body: '{"name":"Bob"}' })
     expect(mockFetch).toHaveBeenCalledWith(
-      '/players/',
+      '/api/players/',
       expect.objectContaining({ method: 'POST', body: '{"name":"Bob"}' }),
     )
   })
