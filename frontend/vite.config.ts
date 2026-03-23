@@ -12,10 +12,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/players': 'http://localhost:8000',
-      '/games':   'http://localhost:8000',
-      '/lineups': 'http://localhost:8000',
-      '/import':  'http://localhost:8000',
+      '/api': 'http://localhost:8000',
     },
   },
 })
