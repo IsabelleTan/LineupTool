@@ -49,32 +49,83 @@ function PlayerRow({ player, isAvailable, record, busy, onToggle }: PlayerRowPro
   )
 }
 
+function Section({
+  title,
+  players,
+  availability,
+  busy,
+  onToggle,
+  isAvailableSection,
+}: {
+  title: string
+  players: Player[]
+  availability: GameAvailability[]
+  busy: boolean
+  onToggle: Props['onToggle']
+  isAvailableSection: boolean
+}) {
+  return (
+    <div>
+      <h3 className="text-sm font-medium mb-1">{title} ({players.length})</h3>
+      {players.length === 0 ? (
+        <p className="text-muted-foreground text-xs">None</p>
+      ) : (
+        <div>
+          {players.map((p) => (
+            <PlayerRow
+              key={p.id}
+              player={p}
+              isAvailable={isAvailableSection}
+              record={availability.find((a) => a.player_id === p.id)}
+              busy={busy}
+              onToggle={onToggle}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function AvailabilityPanel({ players, availability, onToggle, busy = false }: Props) {
   if (players.length === 0) {
     return <p className="text-muted-foreground text-sm">No players found.</p>
   }
 
-  const available = players.filter((p) => isPlayerAvailable(p, availability))
+  const availablePlayers = players.filter(
+    (p) => isPlayerAvailable(p, availability) && p.role === 'Player' && p.status !== 'Injured',
+  )
+  const availableStaff = players.filter(
+    (p) => isPlayerAvailable(p, availability) && (p.role === 'Staff' || p.status === 'Injured'),
+  )
   const unavailable = players.filter((p) => !isPlayerAvailable(p, availability))
 
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-medium mb-1">Available</h3>
-        {available.length === 0 ? (
-          <p className="text-muted-foreground text-xs">None</p>
-        ) : (
-          <div>{available.map((p) => <PlayerRow key={p.id} player={p} isAvailable={true} record={availability.find(a => a.player_id === p.id)} busy={busy} onToggle={onToggle} />)}</div>
-        )}
-      </div>
-      <div>
-        <h3 className="text-sm font-medium mb-1">Unavailable</h3>
-        {unavailable.length === 0 ? (
-          <p className="text-muted-foreground text-xs">None</p>
-        ) : (
-          <div>{unavailable.map((p) => <PlayerRow key={p.id} player={p} isAvailable={false} record={availability.find(a => a.player_id === p.id)} busy={busy} onToggle={onToggle} />)}</div>
-        )}
-      </div>
+      <Section
+        title="Available Players"
+        players={availablePlayers}
+        availability={availability}
+        busy={busy}
+        onToggle={onToggle}
+        isAvailableSection={true}
+      />
+      <Section
+        title="Available Staff"
+        players={availableStaff}
+        availability={availability}
+        busy={busy}
+        onToggle={onToggle}
+        isAvailableSection={true}
+      />
+      <Section
+        title="Unavailable"
+        players={unavailable}
+        availability={availability}
+        busy={busy}
+        onToggle={onToggle}
+        isAvailableSection={false}
+      />
     </div>
   )
 }

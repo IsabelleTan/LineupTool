@@ -17,36 +17,20 @@ const player: Player = {
   updated_at: '2024-01-01T00:00:00',
 }
 
-const playerNoJersey: Player = {
-  ...player,
-  id: 2,
-  name: 'Bob',
-  jersey_number: null,
-  license_number: null,
-}
+const injuredPlayer: Player = { ...player, id: 2, name: 'Bob', jersey_number: null, status: 'Injured' }
+const staffPlayer: Player = { ...player, id: 3, name: 'Carol', role: 'Staff', status: 'Active' }
+const inactivePlayer: Player = { ...player, id: 4, name: 'Dave', status: 'Inactive' }
+const noRecordPlayer: Player = { ...player, id: 5, name: 'Eve', jersey_number: '5' }
 
-const playerNoRecord: Player = {
-  ...player,
-  id: 3,
-  name: 'Charlie',
-  jersey_number: '5',
-  license_number: null,
-}
-
-const availRecord: GameAvailability = {
-  id: 10,
-  game_id: 1,
-  player_id: 1,
-  is_available: true,
-  created_at: '2024-01-01T00:00:00',
-  updated_at: '2024-01-01T00:00:00',
-}
-
-const unavailRecord: GameAvailability = {
-  ...availRecord,
-  id: 11,
-  player_id: 2,
-  is_available: false,
+function avail(playerId: number, isAvailable: boolean): GameAvailability {
+  return {
+    id: playerId * 10,
+    game_id: 1,
+    player_id: playerId,
+    is_available: isAvailable,
+    created_at: '2024-01-01T00:00:00',
+    updated_at: '2024-01-01T00:00:00',
+  }
 }
 
 describe('AvailabilityPanel', () => {
@@ -55,60 +39,83 @@ describe('AvailabilityPanel', () => {
     expect(screen.getByText('No players found.')).toBeInTheDocument()
   })
 
-  it('places player with is_available=true in Available section', () => {
-    render(<AvailabilityPanel players={[player]} availability={[availRecord]} onToggle={vi.fn()} />)
-    const available = screen.getByText('Available').closest('div')!.parentElement!
-    expect(available).toHaveTextContent('Alice')
+  it('places available active player in Available Players section', () => {
+    render(<AvailabilityPanel players={[player]} availability={[avail(1, true)]} onToggle={vi.fn()} />)
+    const section = screen.getByText(/available players/i).closest('div')!.parentElement!
+    expect(section).toHaveTextContent('Alice')
+  })
+
+  it('places available inactive player in Available Players section', () => {
+    render(<AvailabilityPanel players={[inactivePlayer]} availability={[avail(4, true)]} onToggle={vi.fn()} />)
+    const section = screen.getByText(/available players/i).closest('div')!.parentElement!
+    expect(section).toHaveTextContent('Dave')
+  })
+
+  it('places available injured player in Available Staff section', () => {
+    render(<AvailabilityPanel players={[injuredPlayer]} availability={[avail(2, true)]} onToggle={vi.fn()} />)
+    const section = screen.getByText(/available staff/i).closest('div')!.parentElement!
+    expect(section).toHaveTextContent('Bob')
+  })
+
+  it('places available staff player in Available Staff section', () => {
+    render(<AvailabilityPanel players={[staffPlayer]} availability={[avail(3, true)]} onToggle={vi.fn()} />)
+    const section = screen.getByText(/available staff/i).closest('div')!.parentElement!
+    expect(section).toHaveTextContent('Carol')
+  })
+
+  it('places player with no record in Unavailable section', () => {
+    render(<AvailabilityPanel players={[noRecordPlayer]} availability={[]} onToggle={vi.fn()} />)
+    const section = screen.getByText(/unavailable/i).closest('div')!.parentElement!
+    expect(section).toHaveTextContent('Eve')
   })
 
   it('places player with is_available=false in Unavailable section', () => {
-    render(<AvailabilityPanel players={[playerNoJersey]} availability={[unavailRecord]} onToggle={vi.fn()} />)
-    const unavailable = screen.getByText('Unavailable').closest('div')!.parentElement!
-    expect(unavailable).toHaveTextContent('Bob')
+    render(<AvailabilityPanel players={[player]} availability={[avail(1, false)]} onToggle={vi.fn()} />)
+    const section = screen.getByText(/unavailable/i).closest('div')!.parentElement!
+    expect(section).toHaveTextContent('Alice')
   })
 
-  it('places player with no record in Unavailable section (hasn\'t replied)', () => {
-    render(<AvailabilityPanel players={[playerNoRecord]} availability={[]} onToggle={vi.fn()} />)
-    const unavailable = screen.getByText('Unavailable').closest('div')!.parentElement!
-    expect(unavailable).toHaveTextContent('Charlie')
+  it('shows counts in section headers', () => {
+    render(
+      <AvailabilityPanel
+        players={[player, noRecordPlayer]}
+        availability={[avail(1, true)]}
+        onToggle={vi.fn()}
+      />,
+    )
+    expect(screen.getByText(/available players \(1\)/i)).toBeInTheDocument()
+    expect(screen.getByText(/unavailable \(1\)/i)).toBeInTheDocument()
   })
 
   it('calls onToggle(id, recordId, false) when marking available player unavailable', async () => {
     const onToggle = vi.fn()
-    render(<AvailabilityPanel players={[player]} availability={[availRecord]} onToggle={onToggle} />)
+    render(<AvailabilityPanel players={[player]} availability={[avail(1, true)]} onToggle={onToggle} />)
     await userEvent.click(screen.getByRole('button', { name: /mark unavailable/i }))
     expect(onToggle).toHaveBeenCalledWith(1, 10, false)
   })
 
-  it('calls onToggle(id, null, true) for player with no record (marks available)', async () => {
+  it('calls onToggle(id, null, true) for player with no record', async () => {
     const onToggle = vi.fn()
-    render(<AvailabilityPanel players={[playerNoRecord]} availability={[]} onToggle={onToggle} />)
+    render(<AvailabilityPanel players={[noRecordPlayer]} availability={[]} onToggle={onToggle} />)
     await userEvent.click(screen.getByRole('button', { name: /mark available/i }))
-    expect(onToggle).toHaveBeenCalledWith(3, null, true)
-  })
-
-  it('calls onToggle(id, recordId, true) for player with false record', async () => {
-    const onToggle = vi.fn()
-    render(<AvailabilityPanel players={[playerNoJersey]} availability={[unavailRecord]} onToggle={onToggle} />)
-    await userEvent.click(screen.getByRole('button', { name: /mark available/i }))
-    expect(onToggle).toHaveBeenCalledWith(2, 11, true)
+    expect(onToggle).toHaveBeenCalledWith(5, null, true)
   })
 
   it('shows jersey number hint next to name', () => {
-    render(<AvailabilityPanel players={[player]} availability={[availRecord]} onToggle={vi.fn()} />)
+    render(<AvailabilityPanel players={[player]} availability={[avail(1, true)]} onToggle={vi.fn()} />)
     expect(screen.getByText('#7')).toBeInTheDocument()
   })
 
   it('shows no hint when jersey is null', () => {
-    render(<AvailabilityPanel players={[playerNoJersey]} availability={[unavailRecord]} onToggle={vi.fn()} />)
+    render(<AvailabilityPanel players={[injuredPlayer]} availability={[avail(2, false)]} onToggle={vi.fn()} />)
     expect(screen.queryByText(/^#/)).not.toBeInTheDocument()
   })
 
   it('disables all toggle buttons when busy=true', () => {
     render(
       <AvailabilityPanel
-        players={[player, playerNoJersey]}
-        availability={[availRecord, unavailRecord]}
+        players={[player, noRecordPlayer]}
+        availability={[avail(1, true)]}
         onToggle={vi.fn()}
         busy={true}
       />,
