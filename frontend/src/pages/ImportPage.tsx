@@ -1,15 +1,18 @@
 import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { importFromTeamsnap, type ImportResult } from '@/api/import'
+import { downloadBackup, restoreBackup } from '@/api/backup'
 
 function FileInput({
   label,
   description,
+  accept,
   file,
   onChange,
 }: {
   label: string
   description: string
+  accept: string
   file: File | undefined
   onChange: (file: File | undefined) => void
 }) {
@@ -47,7 +50,7 @@ function FileInput({
       <input
         ref={inputRef}
         type="file"
-        accept=".csv,.txt"
+        accept={accept}
         className="hidden"
         onChange={(e) => onChange(e.target.files?.[0])}
       />
@@ -55,7 +58,7 @@ function FileInput({
   )
 }
 
-export default function ImportPage() {
+function TeamSnapSection() {
   const [roster, setRoster] = useState<File | undefined>()
   const [schedule, setSchedule] = useState<File | undefined>()
   const [availability, setAvailability] = useState<File | undefined>()
@@ -80,9 +83,9 @@ export default function ImportPage() {
   const hasFile = roster || schedule || availability
 
   return (
-    <div className="max-w-xl space-y-6">
+    <section className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold">Import from TeamSnap</h1>
+        <h2 className="text-lg font-semibold">TeamSnap Import</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           All files are optional. Upload whichever you have — existing records are
           updated or skipped automatically.
@@ -114,18 +117,21 @@ export default function ImportPage() {
         <FileInput
           label="Roster CSV"
           description="Adds jersey numbers and positions to players"
+          accept=".csv,.txt"
           file={roster}
           onChange={setRoster}
         />
         <FileInput
           label="Schedule CSV"
           description="Adds locations to games"
+          accept=".csv,.txt"
           file={schedule}
           onChange={setSchedule}
         />
         <FileInput
           label="Availability CSV"
           description="Creates players, upcoming games, and availability"
+          accept=".csv,.txt"
           file={availability}
           onChange={setAvailability}
         />
@@ -173,6 +179,97 @@ export default function ImportPage() {
           )}
         </div>
       )}
+    </section>
+  )
+}
+
+function BackupSection() {
+  const [restoreFile, setRestoreFile] = useState<File | undefined>()
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleRestore() {
+    if (!restoreFile) return
+    setLoading(true)
+    setError(null)
+    setSuccess(false)
+    try {
+      await restoreBackup(restoreFile)
+      setSuccess(true)
+      setRestoreFile(undefined)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Restore failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <section className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Backup & Restore</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Download a snapshot of your entire database or restore from a previous backup.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <p className="font-medium text-sm">Export database</p>
+          <p className="text-xs text-muted-foreground">
+            Downloads all players, games, availability, and lineups as a single file.
+          </p>
+          <div className="mt-1">
+            <Button variant="outline" onClick={downloadBackup}>
+              Download backup
+            </Button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <FileInput
+            label="Restore from backup"
+            description="Upload a previously downloaded backup file to replace all current data."
+            accept=".db"
+            file={restoreFile}
+            onChange={(f) => { setRestoreFile(f); setSuccess(false); setError(null) }}
+          />
+          <Button
+            variant="destructive"
+            disabled={!restoreFile || loading}
+            onClick={() => void handleRestore()}
+          >
+            {loading ? 'Restoring…' : 'Restore'}
+          </Button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
+          <p className="text-sm font-medium text-destructive">Restore failed</p>
+          <p className="text-sm text-destructive mt-1 break-all">{error}</p>
+        </div>
+      )}
+
+      {success && (
+        <div className="rounded-md border border-green-500/30 bg-green-500/10 p-4">
+          <p className="text-sm font-medium text-green-700 dark:text-green-400">
+            Database restored successfully. Refresh the page to see the restored data.
+          </p>
+        </div>
+      )}
+    </section>
+  )
+}
+
+export default function ImportPage() {
+  return (
+    <div className="max-w-xl space-y-10">
+      <h1 className="text-2xl font-semibold">Data</h1>
+      <TeamSnapSection />
+      <hr />
+      <BackupSection />
     </div>
   )
 }

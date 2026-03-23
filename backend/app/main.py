@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import (
     availability_router,
+    backup_router,
     games_router,
     import_router,
     lineups_router,
@@ -23,6 +24,7 @@ app.include_router(games_router, prefix="/api")
 app.include_router(availability_router, prefix="/api")
 app.include_router(lineups_router, prefix="/api")
 app.include_router(import_router, prefix="/api/import")
+app.include_router(backup_router, prefix="/api/backup")
 
 
 @app.get("/")

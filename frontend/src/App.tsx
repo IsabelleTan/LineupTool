@@ -25,12 +25,12 @@ function Nav() {
         Games
       </NavLink>
       <NavLink
-        to="/import"
+        to="/data"
         className={({ isActive }) =>
           isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'
         }
       >
-        Import
+        Data
       </NavLink>
     </nav>
   )
@@ -46,7 +46,7 @@ export default function App() {
           <Route path="/players" element={<PlayersPage />} />
           <Route path="/games" element={<GamesPage />} />
           <Route path="/games/:id" element={<GameDetailPage />} />
-          <Route path="/import" element={<ImportPage />} />
+          <Route path="/data" element={<ImportPage />} />
         </Routes>
       </main>
     </div>

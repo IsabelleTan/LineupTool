@@ -1,3 +1,4 @@
+from .backup import router as backup_router
 from .game_availability import router as availability_router
 from .games import router as games_router
 from .import_teamsnap import router as import_router
@@ -10,4 +11,5 @@ __all__ = [
     "availability_router",
     "lineups_router",
     "import_router",
+    "backup_router",
 ]
