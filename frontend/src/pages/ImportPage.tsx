@@ -1,0 +1,178 @@
+import { useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { importFromTeamsnap, type ImportResult } from '@/api/import'
+
+function FileInput({
+  label,
+  description,
+  file,
+  onChange,
+}: {
+  label: string
+  description: string
+  file: File | undefined
+  onChange: (file: File | undefined) => void
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  return (
+    <div className="space-y-1">
+      <p className="font-medium text-sm">{label}</p>
+      <p className="text-xs text-muted-foreground">{description}</p>
+      <div className="flex items-center gap-3 mt-1">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => inputRef.current?.click()}
+          type="button"
+        >
+          Choose file
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          {file ? file.name : 'No file chosen'}
+        </span>
+        {file && (
+          <button
+            type="button"
+            className="text-xs text-muted-foreground hover:text-foreground"
+            onClick={() => {
+              onChange(undefined)
+              if (inputRef.current) inputRef.current.value = ''
+            }}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".csv,.txt"
+        className="hidden"
+        onChange={(e) => onChange(e.target.files?.[0])}
+      />
+    </div>
+  )
+}
+
+export default function ImportPage() {
+  const [roster, setRoster] = useState<File | undefined>()
+  const [schedule, setSchedule] = useState<File | undefined>()
+  const [availability, setAvailability] = useState<File | undefined>()
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<ImportResult | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleImport() {
+    setLoading(true)
+    setError(null)
+    setResult(null)
+    try {
+      const res = await importFromTeamsnap({ roster, schedule, availability })
+      setResult(res)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Import failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const hasFile = roster || schedule || availability
+
+  return (
+    <div className="max-w-xl space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Import from TeamSnap</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          All files are optional. Upload whichever you have — existing records are
+          updated or skipped automatically.
+        </p>
+      </div>
+
+      <div className="rounded-md border p-4 text-sm space-y-2">
+        <p className="font-medium">How to export from TeamSnap</p>
+        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+          <li>
+            <span className="font-medium text-foreground">Roster:</span> Roster tab
+            &rarr; Export &rarr; Export CSV
+            <span className="ml-1 text-xs">(adds jersey numbers &amp; positions)</span>
+          </li>
+          <li>
+            <span className="font-medium text-foreground">Schedule:</span> Schedule tab
+            &rarr; Settings icon &rarr; Export Text File, save as CSV
+            <span className="ml-1 text-xs">(adds game locations)</span>
+          </li>
+          <li>
+            <span className="font-medium text-foreground">Availability:</span>{' '}
+            Availability tab &rarr; Export &rarr; Download CSV
+            <span className="ml-1 text-xs">(creates players, games &amp; availability)</span>
+          </li>
+        </ul>
+      </div>
+
+      <div className="space-y-4">
+        <FileInput
+          label="Roster CSV"
+          description="Adds jersey numbers and positions to players"
+          file={roster}
+          onChange={setRoster}
+        />
+        <FileInput
+          label="Schedule CSV"
+          description="Adds locations to games"
+          file={schedule}
+          onChange={setSchedule}
+        />
+        <FileInput
+          label="Availability CSV"
+          description="Creates players, upcoming games, and availability"
+          file={availability}
+          onChange={setAvailability}
+        />
+      </div>
+
+      <Button onClick={() => void handleImport()} disabled={!hasFile || loading}>
+        {loading ? 'Importing…' : 'Import'}
+      </Button>
+
+      {error && (
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
+          <p className="text-sm font-medium text-destructive">Import failed</p>
+          <p className="text-sm text-destructive mt-1 break-all">{error}</p>
+        </div>
+      )}
+
+      {result && (
+        <div className="rounded-md border border-green-500/30 bg-green-500/10 p-4 space-y-3">
+          <p className="font-medium text-green-700 dark:text-green-400">Import complete</p>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+            <span className="text-muted-foreground">Players added</span>
+            <span>{result.players_added}</span>
+            <span className="text-muted-foreground">Players skipped</span>
+            <span>{result.players_skipped}</span>
+            <span className="text-muted-foreground">Games added</span>
+            <span>{result.games_added}</span>
+            <span className="text-muted-foreground">Games skipped</span>
+            <span>{result.games_skipped}</span>
+            <span className="text-muted-foreground">Availability added</span>
+            <span>{result.availability_added}</span>
+            <span className="text-muted-foreground">Availability skipped</span>
+            <span>{result.availability_skipped}</span>
+          </div>
+          {result.errors.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-destructive">
+                Warnings ({result.errors.length})
+              </p>
+              <ul className="list-disc list-inside space-y-0.5 text-xs text-muted-foreground">
+                {result.errors.map((e, i) => (
+                  <li key={i}>{e}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
