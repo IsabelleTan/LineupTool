@@ -14,7 +14,7 @@ function Nav() {
           isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'
         }
       >
-        Players
+        Roster
       </NavLink>
       <NavLink
         to="/games"
