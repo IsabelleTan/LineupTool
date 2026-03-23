@@ -38,6 +38,10 @@ def export_backup():
     )
 
 
+_MAX_RESTORE_BYTES = 10 * 1024 * 1024  # 10 MB
+_REQUIRED_TABLES = {"players", "games", "game_availability", "lineups", "lineup_slots"}
+
+
 @router.post("/restore")
 async def restore_backup(file: UploadFile = File(...)):
     """Replace the current database with an uploaded backup file."""
@@ -46,19 +50,42 @@ async def restore_backup(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Not a valid SQLite database file")
 
     await file.seek(0)
-    content = await file.read()
+    # Read one byte past the limit so we can detect oversized files without
+    # loading the whole thing into memory first.
+    content = await file.read(_MAX_RESTORE_BYTES + 1)
+    if len(content) > _MAX_RESTORE_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Backup file too large (max {_MAX_RESTORE_BYTES // 1024 // 1024} MB)",
+        )
 
     tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
     tmp.write(content)
     tmp.close()
 
     try:
+        # Validate schema before touching the live database
+        check = sqlite3.connect(tmp.name)
+        tables = {
+            r[0]
+            for r in check.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        check.close()
+        missing = _REQUIRED_TABLES - tables
+        if missing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid backup: missing tables {', '.join(sorted(missing))}",
+            )
+
         src = sqlite3.connect(tmp.name)
         db_path = engine.url.database
         dst = sqlite3.connect(db_path)
         src.backup(dst)
         dst.close()
         src.close()
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
