@@ -53,7 +53,7 @@ export default function GameDetailPage() {
         getLineups(gameId),
       ])
       setGame(gameData)
-      setPlayers(playersData.filter((p) => p.status === 'Active'))
+      setPlayers(playersData)
       setAvailability(availabilityData)
 
       let lineupId: number
@@ -163,7 +163,9 @@ export default function GameDetailPage() {
     }
   }
 
-  const availablePlayers = players.filter((p) => isPlayerAvailable(p, availability))
+  const availablePlayers = players.filter(
+    (p) => isPlayerAvailable(p, availability) && p.role === 'Player' && p.status !== 'Injured',
+  )
 
   if (loading) {
     return <p className="text-muted-foreground">Loading…</p>
