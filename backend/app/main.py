@@ -18,11 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(players_router)
-app.include_router(games_router)
-app.include_router(availability_router)
-app.include_router(lineups_router)
-app.include_router(import_router, prefix="/import")
+app.include_router(players_router, prefix="/api")
+app.include_router(games_router, prefix="/api")
+app.include_router(availability_router, prefix="/api")
+app.include_router(lineups_router, prefix="/api")
+app.include_router(import_router, prefix="/api/import")
 
 
 @app.get("/")

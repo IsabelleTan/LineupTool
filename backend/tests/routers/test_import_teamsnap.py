@@ -1,4 +1,4 @@
-"""Tests for POST /import/teamsnap."""
+"""Tests for POST /api/import/teamsnap."""
 
 from app.routers.import_teamsnap import _parse_date, _parse_game_event, _parse_positions
 
@@ -139,7 +139,7 @@ class TestParsePositions:
 
 
 # ---------------------------------------------------------------------------
-# POST /import/teamsnap — roster
+# POST /api/import/teamsnap — roster
 # ---------------------------------------------------------------------------
 
 
@@ -156,13 +156,13 @@ class TestImportRoster:
         csv = (
             "First,Last,Jersey Number,Position\nAlice,Smith,7,SS\nBob,Jones,14,P / OF\n"
         )
-        r = client.post("/import/teamsnap", files={"roster": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"roster": _upload(csv)})
         assert r.status_code == 200
         data = r.json()
         assert data["players_added"] == 2
         assert data["players_skipped"] == 0
 
-        players = {p["name"]: p for p in client.get("/players/").json()}
+        players = {p["name"]: p for p in client.get("/api/players/").json()}
         assert "Alice Smith" in players
         assert players["Alice Smith"]["jersey_number"] == "7"
         assert players["Alice Smith"]["capable_positions"] == ["SS"]
@@ -170,53 +170,53 @@ class TestImportRoster:
 
     def test_skips_duplicate(self, client):
         csv = "First,Last\nCarol,King\n"
-        client.post("/import/teamsnap", files={"roster": _upload(csv)})
-        r = client.post("/import/teamsnap", files={"roster": _upload(csv)})
+        client.post("/api/import/teamsnap", files={"roster": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"roster": _upload(csv)})
         assert r.json()["players_added"] == 0
         assert r.json()["players_skipped"] == 1
 
     def test_fills_missing_jersey_on_existing(self, client):
         csv_no_jersey = "First,Last\nDave,Lee\n"
-        client.post("/import/teamsnap", files={"roster": _upload(csv_no_jersey)})
+        client.post("/api/import/teamsnap", files={"roster": _upload(csv_no_jersey)})
 
         csv_with_jersey = "First,Last,Jersey Number\nDave,Lee,42\n"
-        client.post("/import/teamsnap", files={"roster": _upload(csv_with_jersey)})
+        client.post("/api/import/teamsnap", files={"roster": _upload(csv_with_jersey)})
 
-        players = {p["name"]: p for p in client.get("/players/").json()}
+        players = {p["name"]: p for p in client.get("/api/players/").json()}
         assert players["Dave Lee"]["jersey_number"] == "42"
 
     def test_strips_note_last_name(self, client):
         csv = "First,Last\nLeandra,(here for back-up)\n"
-        r = client.post("/import/teamsnap", files={"roster": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"roster": _upload(csv)})
         assert r.json()["players_added"] == 1
-        names = [p["name"] for p in client.get("/players/").json()]
+        names = [p["name"] for p in client.get("/api/players/").json()]
         assert "Leandra" in names
 
     def test_skips_row_with_no_first_name(self, client):
         csv = "First,Last\n,Smith\n"
-        r = client.post("/import/teamsnap", files={"roster": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"roster": _upload(csv)})
         assert r.json()["players_added"] == 0
 
 
 # ---------------------------------------------------------------------------
-# POST /import/teamsnap — schedule
+# POST /api/import/teamsnap — schedule
 # ---------------------------------------------------------------------------
 
 
 class TestImportSchedule:
     def test_creates_upcoming_game(self, client):
         csv = "Date,Game / Event Name,Location\n12/31/2099,vs. Eagles,Stadium\n"
-        r = client.post("/import/teamsnap", files={"schedule": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"schedule": _upload(csv)})
         assert r.status_code == 200
         assert r.json()["games_added"] == 1
-        games = client.get("/games/").json()
+        games = client.get("/api/games/").json()
         assert any(
             g["opponent"] == "Eagles" and g["location"] == "Stadium" for g in games
         )
 
     def test_skips_past_game(self, client):
         csv = "Date,Game / Event Name\n01/01/2000,vs. Eagles\n"
-        r = client.post("/import/teamsnap", files={"schedule": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"schedule": _upload(csv)})
         assert r.json()["games_skipped"] == 1
         assert r.json()["games_added"] == 0
 
@@ -224,29 +224,29 @@ class TestImportSchedule:
         csv = (
             "Date,Game / Event Name\n12/31/2099,Practice\n12/31/2099,Indoor Practice\n"
         )
-        r = client.post("/import/teamsnap", files={"schedule": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"schedule": _upload(csv)})
         assert r.json()["games_added"] == 0
 
     def test_away_game_inferred(self, client):
         csv = "Date,Game / Event Name\n12/31/2099,at Barracudas\n"
-        client.post("/import/teamsnap", files={"schedule": _upload(csv)})
-        games = client.get("/games/").json()
+        client.post("/api/import/teamsnap", files={"schedule": _upload(csv)})
+        games = client.get("/api/games/").json()
         g = next(g for g in games if g["opponent"] == "Barracudas")
         assert g["is_home"] is False
 
     def test_skips_duplicate_fills_location(self, client):
         csv1 = "Date,Game / Event Name\n12/30/2099,vs. Panthers\n"
         csv2 = "Date,Game / Event Name,Location\n12/30/2099,vs. Panthers,Field A\n"
-        client.post("/import/teamsnap", files={"schedule": _upload(csv1)})
-        r = client.post("/import/teamsnap", files={"schedule": _upload(csv2)})
+        client.post("/api/import/teamsnap", files={"schedule": _upload(csv1)})
+        r = client.post("/api/import/teamsnap", files={"schedule": _upload(csv2)})
         assert r.json()["games_skipped"] == 1
-        games = client.get("/games/").json()
+        games = client.get("/api/games/").json()
         g = next(g for g in games if g["opponent"] == "Panthers")
         assert g["location"] == "Field A"
 
 
 # ---------------------------------------------------------------------------
-# POST /import/teamsnap — availability
+# POST /api/import/teamsnap — availability
 # ---------------------------------------------------------------------------
 
 
@@ -256,7 +256,7 @@ class TestImportAvailability:
 
     def test_creates_player_and_game(self, client):
         csv = self._avail_csv("Zara", "vs. Frogs 12/31/2099  8:00 AM", "yes")
-        r = client.post("/import/teamsnap", files={"availability": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"availability": _upload(csv)})
         assert r.status_code == 200
         assert r.json()["players_added"] == 1
         assert r.json()["games_added"] == 1
@@ -264,45 +264,45 @@ class TestImportAvailability:
 
     def test_yes_is_available(self, client):
         csv = self._avail_csv("Yuki", "vs. Eagles 12/28/2099  8:00 AM", "yes")
-        client.post("/import/teamsnap", files={"availability": _upload(csv)})
-        games = client.get("/games/").json()
+        client.post("/api/import/teamsnap", files={"availability": _upload(csv)})
+        games = client.get("/api/games/").json()
         game = next(g for g in games if g["opponent"] == "Eagles")
-        avail = client.get(f"/games/{game['id']}/availability/").json()
+        avail = client.get(f"/api/games/{game['id']}/availability/").json()
         assert avail[0]["is_available"] is True
 
     def test_no_is_not_available(self, client):
         csv = self._avail_csv("Xena", "vs. Cardinals 12/27/2099  8:00 AM", "no")
-        client.post("/import/teamsnap", files={"availability": _upload(csv)})
-        games = client.get("/games/").json()
+        client.post("/api/import/teamsnap", files={"availability": _upload(csv)})
+        games = client.get("/api/games/").json()
         game = next(g for g in games if g["opponent"] == "Cardinals")
-        avail = client.get(f"/games/{game['id']}/availability/").json()
+        avail = client.get(f"/api/games/{game['id']}/availability/").json()
         assert avail[0]["is_available"] is False
 
     def test_maybe_skipped(self, client):
         csv = self._avail_csv("Wren", "vs. Flyers 12/26/2099  8:00 AM", "maybe")
-        r = client.post("/import/teamsnap", files={"availability": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"availability": _upload(csv)})
         assert r.json()["availability_added"] == 0
 
     def test_unknown_skipped(self, client):
         csv = self._avail_csv("Vera", "vs. Flyers 12/25/2099  8:00 AM", "unknown")
-        r = client.post("/import/teamsnap", files={"availability": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"availability": _upload(csv)})
         assert r.json()["availability_added"] == 0
 
     def test_practice_column_skipped(self, client):
         csv = "First Name,Last Name,Player,Practice 12/31/2099  6:00 PM\nUma,,Y,yes\n"
-        r = client.post("/import/teamsnap", files={"availability": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"availability": _upload(csv)})
         assert r.json()["games_added"] == 0
         assert r.json()["availability_added"] == 0
 
     def test_past_column_skipped(self, client):
         csv = self._avail_csv("Tina", "vs. Bears 01/01/2000  8:00 AM", "yes")
-        r = client.post("/import/teamsnap", files={"availability": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"availability": _upload(csv)})
         assert r.json()["games_added"] == 0
         assert r.json()["availability_added"] == 0
 
     def test_skips_duplicate_availability(self, client):
         csv = self._avail_csv("Sara", "vs. Panthers 12/24/2099  8:00 AM", "yes")
-        client.post("/import/teamsnap", files={"availability": _upload(csv)})
-        r = client.post("/import/teamsnap", files={"availability": _upload(csv)})
+        client.post("/api/import/teamsnap", files={"availability": _upload(csv)})
+        r = client.post("/api/import/teamsnap", files={"availability": _upload(csv)})
         assert r.json()["availability_skipped"] == 1
         assert r.json()["availability_added"] == 0
