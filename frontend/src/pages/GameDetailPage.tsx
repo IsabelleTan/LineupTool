@@ -25,6 +25,7 @@ import {
   reorderSlots,
   type LineupReadWithSlots,
 } from '@/api/lineups'
+import { useToast, Toast } from '@/lib/toast'
 
 export default function GameDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -41,6 +42,8 @@ export default function GameDetailPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [printOpen, setPrintOpen] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [busyPlayerId, setBusyPlayerId] = useState<number | null>(null)
+  const { toastMessage, showToast } = useToast()
 
   async function load() {
     setLoading(true)
@@ -82,6 +85,7 @@ export default function GameDetailPage() {
     isAvailable: boolean,
   ) {
     setBusy(true)
+    setBusyPlayerId(playerId)
     setMutationError(null)
     try {
       // Marking unavailable: remove any existing lineup slot for this player first
@@ -97,10 +101,12 @@ export default function GameDetailPage() {
         await updateAvailability(gameId, availabilityId, isAvailable)
       }
       setAvailability(await getAvailability(gameId))
+      showToast(isAvailable ? 'Marked available' : 'Marked unavailable')
     } catch (err) {
       setMutationError(err instanceof Error ? err.message : 'Failed to update availability')
     } finally {
       setBusy(false)
+      setBusyPlayerId(null)
     }
   }
 
@@ -158,6 +164,7 @@ export default function GameDetailPage() {
     setMutationError(null)
     try {
       setGame(await updateGame(gameId, data))
+      showToast('Game saved')
     } catch (err) {
       setMutationError(err instanceof Error ? err.message : 'Failed to save game')
     }
@@ -180,9 +187,16 @@ export default function GameDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => navigate('/games')}>
-          ← Games
-        </Button>
+        <nav className="flex items-center gap-1.5 text-sm">
+          <button
+            onClick={() => navigate('/games')}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Games
+          </button>
+          <span className="text-muted-foreground">/</span>
+          <span className="font-medium">{game.opponent}</span>
+        </nav>
         <Button variant="outline" onClick={() => setDialogOpen(true)}>
           Edit Game
         </Button>
@@ -193,7 +207,7 @@ export default function GameDetailPage() {
         <p className="text-muted-foreground">
           {formatDate(game.game_date)} ·{' '}
           {game.is_home ? (
-            <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Home</Badge>
+            <Badge className="bg-blue-100 text-blue-800">Home</Badge>
           ) : (
             <Badge variant="secondary">Away</Badge>
           )}
@@ -215,19 +229,20 @@ export default function GameDetailPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-4 items-start">
-        <div>
+        <div className="rounded-lg border p-4">
           <h2 className="text-lg font-medium mb-2">Availability</h2>
           <AvailabilityPanel
             players={players}
             availability={availability}
             busy={busy}
+            busyPlayerId={busyPlayerId}
             onToggle={(playerId, availabilityId, isAvailable) =>
               void handleToggle(playerId, availabilityId, isAvailable)
             }
           />
         </div>
 
-        <div>
+        <div className="rounded-lg border p-4">
           <h2 className="text-lg font-medium mb-2">Lineup</h2>
           <DiamondView
             availablePlayers={availablePlayers}
@@ -238,7 +253,7 @@ export default function GameDetailPage() {
           />
         </div>
 
-        <div>
+        <div className="rounded-lg border p-4">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-medium">Batting Order</h2>
             <Button variant="outline" size="sm" onClick={() => setPrintOpen(true)}>
@@ -270,6 +285,8 @@ export default function GameDetailPage() {
           onClose={() => setPrintOpen(false)}
         />
       )}
+
+      <Toast message={toastMessage} />
     </div>
   )
 }

@@ -208,10 +208,10 @@ describe('GameDetailPage', () => {
     })
   })
 
-  it('"← Games" navigates back to /games', async () => {
+  it('"Games" breadcrumb navigates back to /games', async () => {
     renderPage()
-    await waitFor(() => screen.getByText(/vs Red Sox/i))
-    await userEvent.click(screen.getByRole('button', { name: /← games/i }))
+    await waitFor(() => screen.getByRole('heading', { name: /vs Red Sox/i }))
+    await userEvent.click(screen.getByRole('button', { name: /^games$/i }))
     expect(screen.getByText('Games List')).toBeInTheDocument()
   })
 

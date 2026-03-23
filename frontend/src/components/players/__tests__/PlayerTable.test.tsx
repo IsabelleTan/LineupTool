@@ -95,4 +95,49 @@ describe('PlayerTable', () => {
     expect(screen.getByText('Status')).toBeInTheDocument()
     expect(screen.getByText('Alice')).toBeInTheDocument()
   })
+
+  it('hides # column when showNumber=false', () => {
+    render(<PlayerTable players={[alice]} onEdit={vi.fn()} onDelete={vi.fn()} showNumber={false} />)
+    expect(screen.queryByText('#')).not.toBeInTheDocument()
+    expect(screen.queryByText('7')).not.toBeInTheDocument()
+  })
+
+  it('calls onRowClick with the correct player when row is clicked', async () => {
+    const onRowClick = vi.fn()
+    render(<PlayerTable players={[alice]} onEdit={vi.fn()} onDelete={vi.fn()} onRowClick={onRowClick} />)
+    await userEvent.click(screen.getByText('Alice'))
+    expect(onRowClick).toHaveBeenCalledWith(alice)
+  })
+
+  it('does not call onRowClick when Edit button is clicked', async () => {
+    const onRowClick = vi.fn()
+    render(<PlayerTable players={[alice]} onEdit={vi.fn()} onDelete={vi.fn()} onRowClick={onRowClick} />)
+    await userEvent.click(screen.getByRole('button', { name: /edit/i }))
+    expect(onRowClick).not.toHaveBeenCalled()
+  })
+
+  it('does not call onRowClick when Delete button is clicked', async () => {
+    const onRowClick = vi.fn()
+    render(<PlayerTable players={[alice]} onEdit={vi.fn()} onDelete={vi.fn()} onRowClick={onRowClick} />)
+    await userEvent.click(screen.getByRole('button', { name: /delete/i }))
+    expect(onRowClick).not.toHaveBeenCalled()
+  })
+
+  it('sorts by name ascending when Name header clicked', async () => {
+    render(<PlayerTable players={[bob, alice]} onEdit={vi.fn()} onDelete={vi.fn()} />)
+    await userEvent.click(screen.getByText('Name'))
+    const rows = screen.getAllByRole('row')
+    // header row + 2 data rows
+    expect(rows[1]).toHaveTextContent('Alice')
+    expect(rows[2]).toHaveTextContent('Bob')
+  })
+
+  it('reverses sort to descending on second click of same column', async () => {
+    render(<PlayerTable players={[alice, bob]} onEdit={vi.fn()} onDelete={vi.fn()} />)
+    await userEvent.click(screen.getByText('Name'))
+    await userEvent.click(screen.getByText('Name'))
+    const rows = screen.getAllByRole('row')
+    expect(rows[1]).toHaveTextContent('Bob')
+    expect(rows[2]).toHaveTextContent('Alice')
+  })
 })
