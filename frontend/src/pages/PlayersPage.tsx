@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import PlayerTable from '@/components/players/PlayerTable'
 import PlayerDialog from '@/components/players/PlayerDialog'
-import { useToast, Toast } from '@/lib/toast'
+import { useToast } from '@/lib/useToast'
+import { Toast } from '@/lib/toast'
 import {
   getPlayers,
   createPlayer,

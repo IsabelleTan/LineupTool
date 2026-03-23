@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import GameTable from '@/components/games/GameTable'
 import GameDialog from '@/components/games/GameDialog'
-import { useToast, Toast } from '@/lib/toast'
+import { useToast } from '@/lib/useToast'
+import { Toast } from '@/lib/toast'
 import {
   getGames,
   createGame,
