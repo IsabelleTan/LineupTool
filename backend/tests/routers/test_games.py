@@ -1,5 +1,7 @@
 def test_create_and_get_game(client):
-    r = client.post("/api/games/", json={"game_date": "2026-06-01", "opponent": "Tigers"})
+    r = client.post(
+        "/api/games/", json={"game_date": "2026-06-01", "opponent": "Tigers"}
+    )
     assert r.status_code == 201
     data = r.json()
     assert data["opponent"] == "Tigers"
@@ -18,7 +20,9 @@ def test_list_games(client):
 
 
 def test_update_game_opponent(client):
-    r = client.post("/api/games/", json={"game_date": "2026-08-01", "opponent": "Lions"})
+    r = client.post(
+        "/api/games/", json={"game_date": "2026-08-01", "opponent": "Lions"}
+    )
     gid = r.json()["id"]
 
     r2 = client.patch(f"/api/games/{gid}", json={"opponent": "Tigers"})
@@ -27,7 +31,9 @@ def test_update_game_opponent(client):
 
 
 def test_delete_game(client):
-    r = client.post("/api/games/", json={"game_date": "2026-09-01", "opponent": "Wolves"})
+    r = client.post(
+        "/api/games/", json={"game_date": "2026-09-01", "opponent": "Wolves"}
+    )
     gid = r.json()["id"]
 
     assert client.delete(f"/api/games/{gid}").status_code == 204

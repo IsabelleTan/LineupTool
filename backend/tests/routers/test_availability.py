@@ -59,7 +59,9 @@ def test_set_availability_player_not_found(client, game_and_player):
 
 def test_update_availability_not_found(client, game_and_player):
     gid, _ = game_and_player
-    r = client.patch(f"/api/games/{gid}/availability/99999", json={"is_available": False})
+    r = client.patch(
+        f"/api/games/{gid}/availability/99999", json={"is_available": False}
+    )
     assert r.status_code == 404
 
 
