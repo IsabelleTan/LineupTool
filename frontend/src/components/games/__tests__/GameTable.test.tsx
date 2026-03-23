@@ -67,4 +67,25 @@ describe('GameTable', () => {
     await userEvent.click(screen.getByRole('button', { name: /delete/i }))
     expect(onDelete).toHaveBeenCalledWith(game1)
   })
+
+  it('calls onView when a row is clicked', async () => {
+    const onView = vi.fn()
+    render(<GameTable games={[game1]} onView={onView} onEdit={vi.fn()} onDelete={vi.fn()} />)
+    await userEvent.click(screen.getByText('Red Sox'))
+    expect(onView).toHaveBeenCalledWith(game1)
+  })
+
+  it('does not call onView when Edit is clicked', async () => {
+    const onView = vi.fn()
+    render(<GameTable games={[game1]} onView={onView} onEdit={vi.fn()} onDelete={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: /edit/i }))
+    expect(onView).not.toHaveBeenCalled()
+  })
+
+  it('does not call onView when Delete is clicked', async () => {
+    const onView = vi.fn()
+    render(<GameTable games={[game1]} onView={onView} onEdit={vi.fn()} onDelete={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: /delete/i }))
+    expect(onView).not.toHaveBeenCalled()
+  })
 })

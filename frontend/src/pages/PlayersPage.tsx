@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import PlayerTable from '@/components/players/PlayerTable'
 import PlayerDialog from '@/components/players/PlayerDialog'
+import { useToast, Toast } from '@/lib/toast'
 import {
   getPlayers,
   createPlayer,
@@ -11,6 +12,16 @@ import {
   type PlayerCreate,
 } from '@/api/players'
 
+const STATUS_ORDER: Record<string, number> = { Active: 0, Injured: 1, Inactive: 2 }
+
+function sortRoster(list: Player[]) {
+  return [...list].sort((a, b) => {
+    const s = (STATUS_ORDER[a.status] ?? 3) - (STATUS_ORDER[b.status] ?? 3)
+    if (s !== 0) return s
+    return a.name.localeCompare(b.name)
+  })
+}
+
 export default function PlayersPage() {
   const [players, setPlayers] = useState<Player[]>([])
   const [loading, setLoading] = useState(true)
@@ -18,6 +29,7 @@ export default function PlayersPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingPlayer, setEditingPlayer] = useState<Player | undefined>()
+  const { toastMessage, showToast } = useToast()
 
   async function load() {
     setLoading(true)
@@ -48,8 +60,10 @@ export default function PlayersPage() {
   async function handleSubmit(data: PlayerCreate) {
     if (editingPlayer) {
       await updatePlayer(editingPlayer.id, data)
+      showToast('Player saved')
     } else {
       await createPlayer(data)
+      showToast('Player added')
     }
     await load()
   }
@@ -58,15 +72,6 @@ export default function PlayersPage() {
     if (!confirm(`Delete ${player.name}?`)) return
     await deletePlayer(player.id)
     await load()
-  }
-
-  const STATUS_ORDER: Record<string, number> = { Active: 0, Injured: 1, Inactive: 2 }
-  function sortRoster(list: Player[]) {
-    return [...list].sort((a, b) => {
-      const s = (STATUS_ORDER[a.status] ?? 3) - (STATUS_ORDER[b.status] ?? 3)
-      if (s !== 0) return s
-      return a.name.localeCompare(b.name)
-    })
   }
 
   const playersList = sortRoster(players.filter((p) => p.role === 'Player'))
@@ -89,6 +94,7 @@ export default function PlayersPage() {
               players={playersList}
               onEdit={openEdit}
               onDelete={(p) => void handleDelete(p)}
+              onRowClick={openEdit}
             />
           </div>
           <div className="space-y-2">
@@ -97,6 +103,8 @@ export default function PlayersPage() {
               players={staffList}
               onEdit={openEdit}
               onDelete={(p) => void handleDelete(p)}
+              onRowClick={openEdit}
+              showNumber={false}
               showLicense={false}
               showPositions={false}
             />
@@ -110,6 +118,7 @@ export default function PlayersPage() {
         onSubmit={handleSubmit}
         player={editingPlayer}
       />
+      <Toast message={toastMessage} />
     </div>
   )
 }

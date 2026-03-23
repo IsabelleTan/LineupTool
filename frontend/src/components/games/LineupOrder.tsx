@@ -68,7 +68,7 @@ export default function LineupOrder({ slots, players, availablePlayers, onReorde
   )
 
   if (slots.length === 0 && benchPlayers.length === 0) {
-    return <p className="text-muted-foreground text-sm">No players assigned yet.</p>
+    return <p className="text-muted-foreground text-sm">Mark players available, then assign them from the diamond.</p>
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -82,6 +82,9 @@ export default function LineupOrder({ slots, players, availablePlayers, onReorde
 
   return (
     <>
+      {slots.length === 0 && (
+        <p className="text-muted-foreground text-sm mb-3">Assign players from the diamond to build the batting order.</p>
+      )}
       {slots.length > 0 && (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={sorted.map((s) => s.id)} strategy={verticalListSortingStrategy}>

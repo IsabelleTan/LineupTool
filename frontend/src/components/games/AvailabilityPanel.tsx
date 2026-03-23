@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react'
 import type { Player } from '@/api/players'
 import type { GameAvailability } from '@/api/availability'
 import { isPlayerAvailable } from '@/lib/utils'
@@ -7,6 +8,7 @@ interface Props {
   availability: GameAvailability[]
   onToggle: (playerId: number, availabilityId: number | null, isAvailable: boolean) => void
   busy?: boolean
+  busyPlayerId?: number | null
 }
 
 function PlayerHint({ player }: { player: Player }) {
@@ -23,28 +25,33 @@ interface PlayerRowProps {
   isAvailable: boolean
   record: GameAvailability | undefined
   busy: boolean
+  busyPlayerId?: number | null
   onToggle: (playerId: number, availabilityId: number | null, isAvailable: boolean) => void
 }
 
-function PlayerRow({ player, isAvailable, record, busy, onToggle }: PlayerRowProps) {
+function PlayerRow({ player, isAvailable, record, busy, busyPlayerId, onToggle }: PlayerRowProps) {
+  const isThisRowBusy = busyPlayerId === player.id
   return (
-    <div className="flex items-center justify-between py-1">
-      <span className="text-sm">
-        {player.name}
-        <PlayerHint player={player} />
-      </span>
+    <div className="flex items-center gap-2 py-1">
       <button
         aria-label={isAvailable ? 'Mark Unavailable' : 'Mark Available'}
         disabled={busy}
         onClick={() => onToggle(player.id, record?.id ?? null, !isAvailable)}
-        className={`w-6 h-6 rounded-full text-white text-base font-bold leading-none flex items-center justify-center shrink-0 disabled:opacity-50 ${
+        className={`w-6 h-6 rounded-md text-sm flex items-center justify-center shrink-0
+          transition-colors disabled:opacity-30 ${
           isAvailable
-            ? 'bg-red-500 hover:bg-red-600'
-            : 'bg-green-500 hover:bg-green-600'
+            ? 'text-red-400 hover:text-red-600 hover:bg-red-50'
+            : 'text-green-500 hover:text-green-700 hover:bg-green-50'
         }`}
       >
-        {isAvailable ? '−' : '+'}
+        {isThisRowBusy
+          ? <Loader2 className="w-3 h-3 animate-spin" />
+          : (isAvailable ? '−' : '+')}
       </button>
+      <span className="text-sm">
+        {player.name}
+        <PlayerHint player={player} />
+      </span>
     </div>
   )
 }
@@ -54,6 +61,7 @@ function Section({
   players,
   availability,
   busy,
+  busyPlayerId,
   onToggle,
   isAvailableSection,
 }: {
@@ -61,6 +69,7 @@ function Section({
   players: Player[]
   availability: GameAvailability[]
   busy: boolean
+  busyPlayerId?: number | null
   onToggle: Props['onToggle']
   isAvailableSection: boolean
 }) {
@@ -78,6 +87,7 @@ function Section({
               isAvailable={isAvailableSection}
               record={availability.find((a) => a.player_id === p.id)}
               busy={busy}
+              busyPlayerId={busyPlayerId}
               onToggle={onToggle}
             />
           ))}
@@ -87,7 +97,7 @@ function Section({
   )
 }
 
-export default function AvailabilityPanel({ players, availability, onToggle, busy = false }: Props) {
+export default function AvailabilityPanel({ players, availability, onToggle, busy = false, busyPlayerId }: Props) {
   if (players.length === 0) {
     return <p className="text-muted-foreground text-sm">No players found.</p>
   }
@@ -107,6 +117,7 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
         players={availablePlayers}
         availability={availability}
         busy={busy}
+        busyPlayerId={busyPlayerId}
         onToggle={onToggle}
         isAvailableSection={true}
       />
@@ -115,6 +126,7 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
         players={availableStaff}
         availability={availability}
         busy={busy}
+        busyPlayerId={busyPlayerId}
         onToggle={onToggle}
         isAvailableSection={true}
       />
@@ -123,6 +135,7 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
         players={unavailable}
         availability={availability}
         busy={busy}
+        busyPlayerId={busyPlayerId}
         onToggle={onToggle}
         isAvailableSection={false}
       />
