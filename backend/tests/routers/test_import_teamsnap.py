@@ -1,7 +1,5 @@
 """Tests for POST /import/teamsnap."""
 
-import pytest
-
 from app.routers.import_teamsnap import _parse_date, _parse_game_event, _parse_positions
 
 

@@ -141,19 +141,19 @@ describe('GameDetailPage', () => {
   it('renders player in availability panel after load', async () => {
     renderPage()
     await waitFor(() => {
-      // Player with no record is available by default
-      expect(screen.getByRole('button', { name: /mark unavailable/i })).toBeInTheDocument()
+      // Player with no record hasn't replied — shown as unavailable
+      expect(screen.getByRole('button', { name: /mark available/i })).toBeInTheDocument()
     })
   })
 
   it('calls createAvailability when no prior record and toggle clicked', async () => {
     vi.mocked(getAvailability).mockResolvedValue([])
     renderPage()
-    // Player with no record is available by default — button says "Mark Unavailable"
-    await waitFor(() => screen.getByRole('button', { name: /mark unavailable/i }))
-    await userEvent.click(screen.getByRole('button', { name: /mark unavailable/i }))
+    // Player with no record hasn't replied — button says "Mark Available"
+    await waitFor(() => screen.getByRole('button', { name: /mark available/i }))
+    await userEvent.click(screen.getByRole('button', { name: /mark available/i }))
     await waitFor(() => {
-      expect(createAvailability).toHaveBeenCalledWith(1, player.id, false)
+      expect(createAvailability).toHaveBeenCalledWith(1, player.id, true)
     })
   })
 
@@ -169,9 +169,9 @@ describe('GameDetailPage', () => {
 
   it('refetches getAvailability after toggle', async () => {
     renderPage()
-    await waitFor(() => screen.getByRole('button', { name: /mark unavailable/i }))
+    await waitFor(() => screen.getByRole('button', { name: /mark available/i }))
     expect(getAvailability).toHaveBeenCalledTimes(1)
-    await userEvent.click(screen.getByRole('button', { name: /mark unavailable/i }))
+    await userEvent.click(screen.getByRole('button', { name: /mark available/i }))
     await waitFor(() => {
       expect(getAvailability).toHaveBeenCalledTimes(2)
     })
