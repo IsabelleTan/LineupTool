@@ -24,6 +24,7 @@ jobs:
             npm run build
 
             cd ../backend
+            poetry install --only main
             poetry run alembic upgrade head
 
             sudo systemctl restart lineuptool
