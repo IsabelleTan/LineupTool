@@ -14,6 +14,9 @@ interface Props {
   players: Player[]
   onEdit: (player: Player) => void
   onDelete: (player: Player) => void
+  emptyMessage?: string
+  showLicense?: boolean
+  showPositions?: boolean
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -24,26 +27,31 @@ function StatusBadge({ status }: { status: string }) {
   return <Badge variant="secondary">Inactive</Badge>
 }
 
-export default function PlayerTable({ players, onEdit, onDelete }: Props) {
+export default function PlayerTable({ players, onEdit, onDelete, emptyMessage = 'None yet.', showLicense = true, showPositions = true }: Props) {
+  // Name absorbs the % of any hidden columns so Status/Actions stay at the same
+  // absolute position in both the Players and Staff tables.
+  let namePct = 25
+  if (!showLicense) namePct += 15
+  if (!showPositions) namePct += 20
+
   if (players.length === 0) {
     return (
-      <p className="text-center text-muted-foreground py-12">
-        No players yet. Add one to get started.
+      <p className="text-muted-foreground text-sm py-2">
+        {emptyMessage}
       </p>
     )
   }
 
   return (
-    <Table>
+    <Table className="table-fixed">
       <TableHeader>
         <TableRow>
-          <TableHead>#</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>License</TableHead>
-          <TableHead>Positions</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead style={{ width: '5%' }}>#</TableHead>
+          <TableHead style={{ width: `${namePct}%` }}>Name</TableHead>
+          {showLicense && <TableHead style={{ width: '15%' }}>License</TableHead>}
+          {showPositions && <TableHead style={{ width: '20%' }}>Positions</TableHead>}
+          <TableHead style={{ width: '15%' }}>Status</TableHead>
+          <TableHead style={{ width: '20%' }} className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -51,9 +59,8 @@ export default function PlayerTable({ players, onEdit, onDelete }: Props) {
           <TableRow key={player.id}>
             <TableCell className="text-muted-foreground">{player.jersey_number ?? '—'}</TableCell>
             <TableCell className="font-medium">{player.name}</TableCell>
-            <TableCell className="text-muted-foreground">{player.license_number ?? '—'}</TableCell>
-            <TableCell>{player.capable_positions?.join(', ') ?? '—'}</TableCell>
-            <TableCell className="text-muted-foreground">{player.role}</TableCell>
+            {showLicense && <TableCell className="text-muted-foreground">{player.license_number ?? '—'}</TableCell>}
+            {showPositions && <TableCell>{player.capable_positions?.join(', ') ?? '—'}</TableCell>}
             <TableCell>
               <StatusBadge status={player.status} />
             </TableCell>

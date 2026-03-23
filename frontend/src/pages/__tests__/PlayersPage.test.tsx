@@ -37,6 +37,18 @@ const bob: Player = {
   updated_at: '2024-01-01T00:00:00',
 }
 
+const carol: Player = {
+  id: 3,
+  name: 'Carol',
+  jersey_number: null,
+  license_number: null,
+  capable_positions: null,
+  role: 'Staff',
+  status: 'Active',
+  created_at: '2024-01-01T00:00:00',
+  updated_at: '2024-01-01T00:00:00',
+}
+
 beforeEach(() => {
   vi.resetAllMocks()
   vi.mocked(getPlayers).mockResolvedValue([alice, bob])
@@ -139,5 +151,47 @@ describe('PlayersPage', () => {
     const deleteButtons = screen.getAllByRole('button', { name: /delete/i })
     await userEvent.click(deleteButtons[0])
     expect(deletePlayer).not.toHaveBeenCalled()
+  })
+
+  it('shows Players and Staff section headings', async () => {
+    render(<PlayersPage />)
+    await waitFor(() => screen.getByText('Alice'))
+    expect(screen.getByRole('heading', { name: 'Players' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Staff' })).toBeInTheDocument()
+  })
+
+  it('places role=Staff player in Staff section, not Players section', async () => {
+    vi.mocked(getPlayers).mockResolvedValue([alice, carol])
+    render(<PlayersPage />)
+    await waitFor(() => screen.getByText('Alice'))
+    const playersSection = screen.getByRole('heading', { name: 'Players' }).closest('div')!
+    const staffSection = screen.getByRole('heading', { name: 'Staff' }).closest('div')!
+    expect(playersSection).not.toHaveTextContent('Carol')
+    expect(staffSection).toHaveTextContent('Carol')
+    expect(playersSection).toHaveTextContent('Alice')
+  })
+
+  it('sorts players Active before Inactive', async () => {
+    // bob is Inactive, alice is Active — bob comes first in the mock array
+    vi.mocked(getPlayers).mockResolvedValue([bob, alice])
+    render(<PlayersPage />)
+    await waitFor(() => screen.getByText('Alice'))
+    const rows = screen.getAllByRole('row')
+    const names = rows.map((r) => r.textContent ?? '')
+    const aliceIdx = names.findIndex((t) => t.includes('Alice'))
+    const bobIdx = names.findIndex((t) => t.includes('Bob'))
+    expect(aliceIdx).toBeLessThan(bobIdx)
+  })
+
+  it('sorts players with same status alphabetically', async () => {
+    const zara: Player = { ...alice, id: 4, name: 'Zara' }
+    vi.mocked(getPlayers).mockResolvedValue([zara, alice])
+    render(<PlayersPage />)
+    await waitFor(() => screen.getByText('Alice'))
+    const rows = screen.getAllByRole('row')
+    const names = rows.map((r) => r.textContent ?? '')
+    const aliceIdx = names.findIndex((t) => t.includes('Alice'))
+    const zaraIdx = names.findIndex((t) => t.includes('Zara'))
+    expect(aliceIdx).toBeLessThan(zaraIdx)
   })
 })
