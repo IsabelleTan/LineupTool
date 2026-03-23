@@ -25,7 +25,8 @@ import {
   reorderSlots,
   type LineupReadWithSlots,
 } from '@/api/lineups'
-import { useToast, Toast } from '@/lib/toast'
+import { useToast } from '@/lib/useToast'
+import { Toast } from '@/lib/toast'
 
 export default function GameDetailPage() {
   const { id } = useParams<{ id: string }>()
