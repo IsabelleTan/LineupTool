@@ -66,10 +66,10 @@ describe('AvailabilityPanel', () => {
     expect(unavailable).toHaveTextContent('Bob')
   })
 
-  it('places player with no record in Available section (available by default)', () => {
+  it('places player with no record in Unavailable section (hasn\'t replied)', () => {
     render(<AvailabilityPanel players={[playerNoRecord]} availability={[]} onToggle={vi.fn()} />)
-    const available = screen.getByText('Available').closest('div')!.parentElement!
-    expect(available).toHaveTextContent('Charlie')
+    const unavailable = screen.getByText('Unavailable').closest('div')!.parentElement!
+    expect(unavailable).toHaveTextContent('Charlie')
   })
 
   it('calls onToggle(id, recordId, false) when marking available player unavailable', async () => {
@@ -79,11 +79,11 @@ describe('AvailabilityPanel', () => {
     expect(onToggle).toHaveBeenCalledWith(1, 10, false)
   })
 
-  it('calls onToggle(id, null, false) for player with no record (marks unavailable from default)', async () => {
+  it('calls onToggle(id, null, true) for player with no record (marks available)', async () => {
     const onToggle = vi.fn()
     render(<AvailabilityPanel players={[playerNoRecord]} availability={[]} onToggle={onToggle} />)
-    await userEvent.click(screen.getByRole('button', { name: /mark unavailable/i }))
-    expect(onToggle).toHaveBeenCalledWith(3, null, false)
+    await userEvent.click(screen.getByRole('button', { name: /mark available/i }))
+    expect(onToggle).toHaveBeenCalledWith(3, null, true)
   })
 
   it('calls onToggle(id, recordId, true) for player with false record', async () => {
