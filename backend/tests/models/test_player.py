@@ -9,7 +9,8 @@ def test_player_basic_fields(db):
     assert player.id is not None
     assert player.name == "Alice"
     assert player.jersey_number == "7"
-    assert player.is_active is True
+    assert player.role == "Player"
+    assert player.status == "Active"
 
 
 def test_player_jersey_number_zero_zero(db):
@@ -28,7 +29,8 @@ def test_player_defaults(db):
     assert player.jersey_number is None
     assert player.license_number is None
     assert player.capable_positions is None
-    assert player.is_active is True
+    assert player.role == "Player"
+    assert player.status == "Active"
 
 
 def test_player_capable_positions_json(db):
@@ -42,12 +44,12 @@ def test_player_capable_positions_json(db):
     assert loaded.capable_positions == positions
 
 
-def test_player_inactive(db):
-    player = Player(name="Eve", is_active=False)
+def test_player_injured(db):
+    player = Player(name="Eve", status="Injured")
     db.add(player)
     db.flush()
 
-    assert player.is_active is False
+    assert player.status == "Injured"
 
 
 def test_player_timestamps(db):

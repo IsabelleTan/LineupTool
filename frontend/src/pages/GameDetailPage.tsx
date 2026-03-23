@@ -53,7 +53,7 @@ export default function GameDetailPage() {
         getLineups(gameId),
       ])
       setGame(gameData)
-      setPlayers(playersData.filter((p) => p.is_active))
+      setPlayers(playersData.filter((p) => p.status === 'Active'))
       setAvailability(availabilityData)
 
       let lineupId: number

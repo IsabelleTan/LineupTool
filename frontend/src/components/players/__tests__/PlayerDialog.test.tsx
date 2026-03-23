@@ -10,7 +10,8 @@ const alice: Player = {
   jersey_number: '7',
   license_number: null,
   capable_positions: ['SS', '2B'],
-  is_active: true,
+  role: 'Player',
+  status: 'Active',
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -47,7 +48,7 @@ describe('PlayerDialog — add mode', () => {
     render(<PlayerDialog open onClose={vi.fn()} onSubmit={onSubmit} />)
 
     await userEvent.type(screen.getByLabelText(/name/i), 'Dana')
-    await userEvent.type(screen.getByLabelText(/capable positions/i), 'P, 1B, CF')
+    await userEvent.type(screen.getByLabelText(/positions/i), 'P, 1B, CF')
     await userEvent.click(screen.getByRole('button', { name: /add player/i }))
 
     await waitFor(() => {

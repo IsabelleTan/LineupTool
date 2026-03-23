@@ -11,7 +11,8 @@ const mockPlayer = {
   jersey_number: '7',
   license_number: null,
   capable_positions: ['SS', '2B'],
-  is_active: true,
+  role: 'Player',
+  status: 'Active',
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -40,11 +41,11 @@ describe('createPlayer', () => {
 
 describe('updatePlayer', () => {
   it('calls PATCH /players/:id with JSON body', async () => {
-    apiFetch.mockResolvedValue({ ...mockPlayer, is_active: false })
-    await updatePlayer(1, { is_active: false })
+    apiFetch.mockResolvedValue({ ...mockPlayer, status: 'Inactive' })
+    await updatePlayer(1, { status: 'Inactive' })
     expect(apiFetch).toHaveBeenCalledWith('/players/1', {
       method: 'PATCH',
-      body: JSON.stringify({ is_active: false }),
+      body: JSON.stringify({ status: 'Inactive' }),
     })
   })
 })

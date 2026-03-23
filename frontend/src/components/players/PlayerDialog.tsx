@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Player, PlayerCreate } from '@/api/players'
@@ -24,7 +23,8 @@ interface FormState {
   jersey_number: string
   license_number: string
   capable_positions: string
-  is_active: boolean
+  role: string
+  status: string
 }
 
 function toFormState(player?: Player): FormState {
@@ -33,7 +33,8 @@ function toFormState(player?: Player): FormState {
     jersey_number: player?.jersey_number ?? '',
     license_number: player?.license_number ?? '',
     capable_positions: player?.capable_positions?.join(', ') ?? '',
-    is_active: player?.is_active ?? true,
+    role: player?.role ?? 'Player',
+    status: player?.status ?? 'Active',
   }
 }
 
@@ -49,7 +50,7 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
     }
   }, [open, player])
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
   }
@@ -68,7 +69,8 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
         jersey_number: form.jersey_number.trim() || null,
         license_number: form.license_number.trim() || null,
         capable_positions: positions.length ? positions : null,
-        is_active: form.is_active,
+        role: form.role,
+        status: form.status,
       })
       onClose()
     } catch (err) {
@@ -121,7 +123,7 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="capable_positions">Capable Positions</Label>
+            <Label htmlFor="capable_positions">Positions</Label>
             <Input
               id="capable_positions"
               name="capable_positions"
@@ -131,15 +133,32 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
             />
             <p className="text-xs text-muted-foreground">Comma-separated</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="is_active"
-              checked={form.is_active}
-              onCheckedChange={(checked) =>
-                setForm((prev) => ({ ...prev, is_active: checked === true }))
-              }
-            />
-            <Label htmlFor="is_active">Active</Label>
+          <div className="space-y-1">
+            <Label htmlFor="role">Role</Label>
+            <select
+              id="role"
+              name="role"
+              value={form.role}
+              onChange={handleChange}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="Player">Player</option>
+              <option value="Staff">Staff</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="status">Status</Label>
+            <select
+              id="status"
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Injured">Injured</option>
+            </select>
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>

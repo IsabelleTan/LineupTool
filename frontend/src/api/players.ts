@@ -6,7 +6,8 @@ export interface Player {
   jersey_number: string | null
   license_number: string | null
   capable_positions: string[] | null
-  is_active: boolean
+  role: string
+  status: string
   created_at: string
   updated_at: string
 }
@@ -16,7 +17,8 @@ export interface PlayerCreate {
   jersey_number?: string | null
   license_number?: string | null
   capable_positions?: string[] | null
-  is_active?: boolean
+  role?: string
+  status?: string
 }
 
 export interface PlayerUpdate {
@@ -24,7 +26,8 @@ export interface PlayerUpdate {
   jersey_number?: string | null
   license_number?: string | null
   capable_positions?: string[] | null
-  is_active?: boolean
+  role?: string
+  status?: string
 }
 
 export function getPlayers(): Promise<Player[]> {
