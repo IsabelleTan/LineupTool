@@ -29,9 +29,14 @@ const bob: Player = {
 }
 
 describe('PlayerTable', () => {
-  it('shows empty state message when no players', () => {
+  it('shows default empty state when no players', () => {
     render(<PlayerTable players={[]} onEdit={vi.fn()} onDelete={vi.fn()} />)
-    expect(screen.getByText(/no players yet/i)).toBeInTheDocument()
+    expect(screen.getByText('None yet.')).toBeInTheDocument()
+  })
+
+  it('shows custom emptyMessage when provided', () => {
+    render(<PlayerTable players={[]} onEdit={vi.fn()} onDelete={vi.fn()} emptyMessage="No staff added." />)
+    expect(screen.getByText('No staff added.')).toBeInTheDocument()
   })
 
   it('renders a row for each player', () => {
@@ -72,5 +77,22 @@ describe('PlayerTable', () => {
     render(<PlayerTable players={[alice]} onEdit={vi.fn()} onDelete={onDelete} />)
     await userEvent.click(screen.getByRole('button', { name: /delete/i }))
     expect(onDelete).toHaveBeenCalledWith(alice)
+  })
+
+  it('hides License column when showLicense=false', () => {
+    render(<PlayerTable players={[alice]} onEdit={vi.fn()} onDelete={vi.fn()} showLicense={false} />)
+    expect(screen.queryByText('License')).not.toBeInTheDocument()
+  })
+
+  it('hides Positions column when showPositions=false', () => {
+    render(<PlayerTable players={[alice]} onEdit={vi.fn()} onDelete={vi.fn()} showPositions={false} />)
+    expect(screen.queryByText('Positions')).not.toBeInTheDocument()
+  })
+
+  it('still shows Name and Status columns when License and Positions are hidden', () => {
+    render(<PlayerTable players={[alice]} onEdit={vi.fn()} onDelete={vi.fn()} showLicense={false} showPositions={false} />)
+    expect(screen.getByText('Name')).toBeInTheDocument()
+    expect(screen.getByText('Status')).toBeInTheDocument()
+    expect(screen.getByText('Alice')).toBeInTheDocument()
   })
 })
