@@ -54,7 +54,8 @@ const player: Player = {
   jersey_number: '7',
   license_number: null,
   capable_positions: ['SS'],
-  is_active: true,
+  role: 'Player',
+  status: 'Active',
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
