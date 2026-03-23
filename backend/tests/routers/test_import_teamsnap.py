@@ -2,10 +2,10 @@
 
 from app.routers.import_teamsnap import _parse_date, _parse_game_event, _parse_positions
 
-
 # ---------------------------------------------------------------------------
 # _parse_game_event
 # ---------------------------------------------------------------------------
+
 
 class TestParseGameEvent:
     def test_vs_home(self):
@@ -90,17 +90,21 @@ class TestParseGameEvent:
 # _parse_date
 # ---------------------------------------------------------------------------
 
+
 class TestParseDate:
     def test_mm_dd_yyyy(self):
         from datetime import date
+
         assert _parse_date("06/08/2026") == date(2026, 6, 8)
 
     def test_mm_dd_yy(self):
         from datetime import date
+
         assert _parse_date("06/08/26") == date(2026, 6, 8)
 
     def test_iso(self):
         from datetime import date
+
         assert _parse_date("2026-06-08") == date(2026, 6, 8)
 
     def test_invalid_returns_none(self):
@@ -108,12 +112,14 @@ class TestParseDate:
 
     def test_strips_whitespace(self):
         from datetime import date
+
         assert _parse_date("  06/08/2026  ") == date(2026, 6, 8)
 
 
 # ---------------------------------------------------------------------------
 # _parse_positions
 # ---------------------------------------------------------------------------
+
 
 class TestParsePositions:
     def test_single(self):
@@ -136,6 +142,7 @@ class TestParsePositions:
 # POST /import/teamsnap — roster
 # ---------------------------------------------------------------------------
 
+
 def _csv(content: str) -> bytes:
     return content.encode("utf-8")
 
@@ -146,7 +153,9 @@ def _upload(content: str, name: str = "file.csv"):
 
 class TestImportRoster:
     def test_creates_players(self, client):
-        csv = "First,Last,Jersey Number,Position\nAlice,Smith,7,SS\nBob,Jones,14,P / OF\n"
+        csv = (
+            "First,Last,Jersey Number,Position\nAlice,Smith,7,SS\nBob,Jones,14,P / OF\n"
+        )
         r = client.post("/import/teamsnap", files={"roster": _upload(csv)})
         assert r.status_code == 200
         data = r.json()
@@ -193,6 +202,7 @@ class TestImportRoster:
 # POST /import/teamsnap — schedule
 # ---------------------------------------------------------------------------
 
+
 class TestImportSchedule:
     def test_creates_upcoming_game(self, client):
         csv = "Date,Game / Event Name,Location\n12/31/2099,vs. Eagles,Stadium\n"
@@ -200,7 +210,9 @@ class TestImportSchedule:
         assert r.status_code == 200
         assert r.json()["games_added"] == 1
         games = client.get("/games/").json()
-        assert any(g["opponent"] == "Eagles" and g["location"] == "Stadium" for g in games)
+        assert any(
+            g["opponent"] == "Eagles" and g["location"] == "Stadium" for g in games
+        )
 
     def test_skips_past_game(self, client):
         csv = "Date,Game / Event Name\n01/01/2000,vs. Eagles\n"
@@ -209,7 +221,9 @@ class TestImportSchedule:
         assert r.json()["games_added"] == 0
 
     def test_skips_practice(self, client):
-        csv = "Date,Game / Event Name\n12/31/2099,Practice\n12/31/2099,Indoor Practice\n"
+        csv = (
+            "Date,Game / Event Name\n12/31/2099,Practice\n12/31/2099,Indoor Practice\n"
+        )
         r = client.post("/import/teamsnap", files={"schedule": _upload(csv)})
         assert r.json()["games_added"] == 0
 
@@ -234,6 +248,7 @@ class TestImportSchedule:
 # ---------------------------------------------------------------------------
 # POST /import/teamsnap — availability
 # ---------------------------------------------------------------------------
+
 
 class TestImportAvailability:
     def _avail_csv(self, player: str, event_col: str, cell: str) -> str:

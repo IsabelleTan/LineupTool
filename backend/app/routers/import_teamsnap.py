@@ -24,7 +24,10 @@ _GAME_PATTERNS: list[tuple[re.Pattern, bool]] = [
     (re.compile(r"^playoffs?\s+vs\.?\s*(.+)$", re.IGNORECASE), True),
     (re.compile(r"^playoffs?\s+at\s+(.+)$", re.IGNORECASE), False),
     (re.compile(r"^semi\s*finals?\s+vs\.?\s*(.+)$", re.IGNORECASE), True),
-    (re.compile(r"^finals?\s+(?:best\s+of\s+\d+\s*)?vs\.?\s*(.+)$", re.IGNORECASE), True),
+    (
+        re.compile(r"^finals?\s+(?:best\s+of\s+\d+\s*)?vs\.?\s*(.+)$", re.IGNORECASE),
+        True,
+    ),
     (re.compile(r"^finals?\s+best\s+of\s+\d+$", re.IGNORECASE), True),
     (re.compile(r"^friendly\s+game(?:\s+vs\.?\s*(.+))?$", re.IGNORECASE), True),
     (re.compile(r"^rainout\s+game$", re.IGNORECASE), True),
@@ -109,7 +112,9 @@ def import_teamsnap(
             name = _parse_name(row)
             if not name:
                 continue
-            jersey = (row.get("Jersey Number") or row.get("Jersey #") or row.get("#") or "").strip() or None
+            jersey = (
+                row.get("Jersey Number") or row.get("Jersey #") or row.get("#") or ""
+            ).strip() or None
             positions = _parse_positions(row.get("Position") or "")
             existing = db.query(Player).filter(Player.name == name).first()
             if existing:
@@ -119,7 +124,9 @@ def import_teamsnap(
                     existing.capable_positions = positions
                 result["players_skipped"] += 1
             else:
-                db.add(Player(name=name, jersey_number=jersey, capable_positions=positions))
+                db.add(
+                    Player(name=name, jersey_number=jersey, capable_positions=positions)
+                )
                 result["players_added"] += 1
         db.commit()
 
@@ -164,7 +171,14 @@ def import_teamsnap(
                     existing.location = location
                 result["games_skipped"] += 1
                 continue
-            db.add(Game(game_date=game_date, opponent=opponent, location=location, is_home=is_home))
+            db.add(
+                Game(
+                    game_date=game_date,
+                    opponent=opponent,
+                    location=location,
+                    is_home=is_home,
+                )
+            )
             result["games_added"] += 1
         db.commit()
 

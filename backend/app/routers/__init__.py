@@ -4,4 +4,10 @@ from .import_teamsnap import router as import_router
 from .lineups import router as lineups_router
 from .players import router as players_router
 
-__all__ = ["players_router", "games_router", "availability_router", "lineups_router", "import_router"]
+__all__ = [
+    "players_router",
+    "games_router",
+    "availability_router",
+    "lineups_router",
+    "import_router",
+]
