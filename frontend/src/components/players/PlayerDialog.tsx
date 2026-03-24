@@ -158,6 +158,7 @@ export default function PlayerDialog({ open, onClose, onSubmit, player }: Props)
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
               <option value="Injured">Injured</option>
+              <option value="Pregnant">Pregnant</option>
             </select>
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}

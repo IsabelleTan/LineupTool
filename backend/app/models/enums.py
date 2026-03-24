@@ -10,6 +10,7 @@ class PlayerStatus(str, enum.Enum):
     ACTIVE = "Active"
     INACTIVE = "Inactive"
     INJURED = "Injured"
+    PREGNANT = "Pregnant"
 
 
 class FieldingPosition(str, enum.Enum):

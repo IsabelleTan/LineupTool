@@ -18,6 +18,7 @@ const player: Player = {
 }
 
 const injuredPlayer: Player = { ...player, id: 2, name: 'Bob', jersey_number: null, status: 'Injured' }
+const pregnantPlayer: Player = { ...player, id: 6, name: 'Faye', jersey_number: null, status: 'Pregnant' }
 const staffPlayer: Player = { ...player, id: 3, name: 'Carol', role: 'Staff', status: 'Active' }
 const inactivePlayer: Player = { ...player, id: 4, name: 'Dave', status: 'Inactive' }
 const noRecordPlayer: Player = { ...player, id: 5, name: 'Eve', jersey_number: '5' }
@@ -55,6 +56,12 @@ describe('AvailabilityPanel', () => {
     render(<AvailabilityPanel players={[injuredPlayer]} availability={[avail(2, true)]} onToggle={vi.fn()} />)
     const section = screen.getByText(/available staff/i).closest('div')!.parentElement!
     expect(section).toHaveTextContent('Bob')
+  })
+
+  it('places available pregnant player in Available Staff section', () => {
+    render(<AvailabilityPanel players={[pregnantPlayer]} availability={[avail(6, true)]} onToggle={vi.fn()} />)
+    const section = screen.getByText(/available staff/i).closest('div')!.parentElement!
+    expect(section).toHaveTextContent('Faye')
   })
 
   it('places available staff player in Available Staff section', () => {

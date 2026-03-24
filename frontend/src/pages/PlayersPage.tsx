@@ -13,7 +13,7 @@ import {
   type PlayerCreate,
 } from '@/api/players'
 
-const STATUS_ORDER: Record<string, number> = { Active: 0, Injured: 1, Inactive: 2 }
+const STATUS_ORDER: Record<string, number> = { Active: 0, Injured: 1, Pregnant: 2, Inactive: 3 }
 
 function sortRoster(list: Player[]) {
   return [...list].sort((a, b) => {
