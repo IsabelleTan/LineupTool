@@ -6,6 +6,7 @@ export interface Game {
   opponent: string
   location: string | null
   is_home: boolean
+  game_number: number | null
   created_at: string
   updated_at: string
 }
@@ -15,6 +16,7 @@ export interface GameCreate {
   opponent: string
   location?: string | null
   is_home?: boolean
+  game_number?: number | null
 }
 
 export type GameUpdate = Partial<GameCreate>

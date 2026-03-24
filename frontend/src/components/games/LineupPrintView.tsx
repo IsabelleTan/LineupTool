@@ -113,7 +113,7 @@ export default function LineupPrintView({ game, slots, players, availablePlayers
             <td style={hCell} />
             <td style={cell} />
             <td style={hCell}>SPIELNUMMER</td>
-            <td style={cell} />
+            <td style={cell}>{game.game_number ?? ''}</td>
           </tr>
         </tbody>
       </table>
