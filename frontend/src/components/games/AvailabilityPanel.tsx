@@ -51,6 +51,9 @@ function PlayerRow({ player, isAvailable, record, busy, busyPlayerId, onToggle }
       <span className="text-sm">
         {player.name}
         <PlayerHint player={player} />
+        {(player.status === 'Injured' || player.status === 'Pregnant') && (
+          <span className="text-muted-foreground text-xs ml-1">({player.status})</span>
+        )}
       </span>
     </div>
   )
