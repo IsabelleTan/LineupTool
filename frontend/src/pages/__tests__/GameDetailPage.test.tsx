@@ -134,8 +134,9 @@ describe('GameDetailPage', () => {
   it('renders game header after load', async () => {
     renderPage()
     await waitFor(() => {
-      expect(screen.getByText(/vs Red Sox/i)).toBeInTheDocument()
-      expect(screen.getByText(/Fenway Park/i)).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /vs Red Sox/i })).toBeInTheDocument()
+      // Fenway Park appears in both the header and the print sheet
+      expect(screen.getAllByText(/Fenway Park/i).length).toBeGreaterThan(0)
     })
   })
 
@@ -286,6 +287,16 @@ describe('GameDetailPage', () => {
     await waitFor(() => screen.getByRole('button', { name: /mark available/i }))
     // Alice is explicitly unavailable — should not appear on diamond
     expect(screen.queryByRole('button', { name: 'Alice' })).not.toBeInTheDocument()
+  })
+
+  it('Print button calls window.print with correct document title', async () => {
+    const printSpy = vi.spyOn(window, 'print').mockImplementation(() => {})
+    renderPage()
+    await waitFor(() => screen.getByRole('button', { name: /print/i }))
+    await userEvent.click(screen.getByRole('button', { name: /print/i }))
+    expect(printSpy).toHaveBeenCalled()
+    expect(document.title).toBe('Line Up vs Red Sox 01-06-2026')
+    printSpy.mockRestore()
   })
 
   it('busy disables diamond interaction during mutation', async () => {
