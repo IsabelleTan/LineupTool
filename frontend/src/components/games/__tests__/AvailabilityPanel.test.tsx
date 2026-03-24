@@ -113,6 +113,21 @@ describe('AvailabilityPanel', () => {
     expect(screen.getByText('#7')).toBeInTheDocument()
   })
 
+  it('shows status label in parentheses for injured players', () => {
+    render(<AvailabilityPanel players={[injuredPlayer]} availability={[avail(2, true)]} onToggle={vi.fn()} />)
+    expect(screen.getByText('(Injured)')).toBeInTheDocument()
+  })
+
+  it('shows status label in parentheses for pregnant players', () => {
+    render(<AvailabilityPanel players={[pregnantPlayer]} availability={[avail(6, true)]} onToggle={vi.fn()} />)
+    expect(screen.getByText('(Pregnant)')).toBeInTheDocument()
+  })
+
+  it('does not show status label for active players', () => {
+    render(<AvailabilityPanel players={[player]} availability={[avail(1, true)]} onToggle={vi.fn()} />)
+    expect(screen.queryByText(/\(Active\)/)).not.toBeInTheDocument()
+  })
+
   it('shows no hint when jersey is null', () => {
     render(<AvailabilityPanel players={[injuredPlayer]} availability={[avail(2, false)]} onToggle={vi.fn()} />)
     expect(screen.queryByText(/^#/)).not.toBeInTheDocument()
