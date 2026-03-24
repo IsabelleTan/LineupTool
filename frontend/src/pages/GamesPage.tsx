@@ -13,6 +13,8 @@ import {
   type Game,
   type GameCreate,
 } from '@/api/games'
+import { getAvailability, createAvailability } from '@/api/availability'
+import { getLineups, getLineup, createLineup, createSlot } from '@/api/lineups'
 
 function splitGames(games: Game[]): { upcoming: Game[]; past: Game[] } {
   const today = new Date().toISOString().slice(0, 10)
@@ -73,12 +75,37 @@ export default function GamesPage() {
   }
 
   async function handleDuplicate(game: Game) {
-    await createGame({
+    const newGame = await createGame({
       game_date: game.game_date,
       opponent: game.opponent,
       location: game.location,
       is_home: game.is_home,
     })
+
+    // Copy availability records
+    const availability = await getAvailability(game.id)
+    await Promise.all(
+      availability.map((a) => createAvailability(newGame.id, a.player_id, a.is_available))
+    )
+
+    // Copy lineup slots (take the first lineup if one exists)
+    const lineups = await getLineups(game.id)
+    if (lineups.length > 0) {
+      const sourceLineup = await getLineup(lineups[0].id)
+      if (sourceLineup.slots.length > 0) {
+        const newLineup = await createLineup({ game_id: newGame.id })
+        await Promise.all(
+          sourceLineup.slots.map((s) =>
+            createSlot(newLineup.id, {
+              player_id: s.player_id,
+              batting_order: s.batting_order,
+              fielding_position: s.fielding_position,
+            })
+          )
+        )
+      }
+    }
+
     showToast('Game duplicated')
     await load()
   }
