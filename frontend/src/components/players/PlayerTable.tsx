@@ -15,7 +15,7 @@ import type { Player } from '@/api/players'
 type SortColumn = 'name' | 'number' | 'positions' | 'status' | 'license'
 type SortDir = 'asc' | 'desc'
 
-const STATUS_ORDER: Record<string, number> = { Active: 0, Injured: 1, Inactive: 2 }
+const STATUS_ORDER: Record<string, number> = { Active: 0, Injured: 1, Pregnant: 2, Inactive: 3 }
 
 interface Props {
   players: Player[]
@@ -33,6 +33,8 @@ function StatusBadge({ status }: { status: string }) {
     return <Badge className="bg-green-100 text-green-800">Active</Badge>
   if (status === 'Injured')
     return <Badge className="bg-yellow-100 text-yellow-800">Injured</Badge>
+  if (status === 'Pregnant')
+    return <Badge className="bg-pink-100 text-pink-800">Pregnant</Badge>
   return <Badge variant="secondary">Inactive</Badge>
 }
 

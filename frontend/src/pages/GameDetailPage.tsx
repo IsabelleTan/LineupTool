@@ -179,7 +179,7 @@ export default function GameDetailPage() {
   }
 
   const availablePlayers = players.filter(
-    (p) => isPlayerAvailable(p, availability) && p.role === 'Player' && p.status !== 'Injured',
+    (p) => isPlayerAvailable(p, availability) && p.role === 'Player' && !['Injured', 'Pregnant'].includes(p.status),
   )
 
   if (loading) {

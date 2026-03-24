@@ -102,11 +102,12 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
     return <p className="text-muted-foreground text-sm">No players found.</p>
   }
 
+  const nonPlayingStatuses = ['Injured', 'Pregnant']
   const availablePlayers = players.filter(
-    (p) => isPlayerAvailable(p, availability) && p.role === 'Player' && p.status !== 'Injured',
+    (p) => isPlayerAvailable(p, availability) && p.role === 'Player' && !nonPlayingStatuses.includes(p.status),
   )
   const availableStaff = players.filter(
-    (p) => isPlayerAvailable(p, availability) && (p.role === 'Staff' || p.status === 'Injured'),
+    (p) => isPlayerAvailable(p, availability) && (p.role === 'Staff' || nonPlayingStatuses.includes(p.status)),
   )
   const unavailable = players.filter((p) => !isPlayerAvailable(p, availability))
 

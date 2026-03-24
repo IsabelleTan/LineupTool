@@ -281,6 +281,16 @@ describe('GameDetailPage', () => {
     })
   })
 
+  it('availablePlayers excludes pregnant players from diamond even when available', async () => {
+    const pregnantPlayer = { ...player, id: 20, name: 'Faye', status: 'Pregnant' }
+    const pregnantAvail: GameAvailability = { ...availabilityRecord, player_id: 20, id: 99 }
+    vi.mocked(getPlayers).mockResolvedValue([pregnantPlayer])
+    vi.mocked(getAvailability).mockResolvedValue([pregnantAvail])
+    renderPage()
+    await waitFor(() => screen.getByRole('button', { name: /mark unavailable/i }))
+    expect(screen.queryByRole('button', { name: 'Faye' })).not.toBeInTheDocument()
+  })
+
   it('availablePlayers excludes players with explicit is_available: false', async () => {
     const unavailRecord: GameAvailability = { ...availabilityRecord, is_available: false }
     vi.mocked(getAvailability).mockResolvedValue([unavailRecord])
