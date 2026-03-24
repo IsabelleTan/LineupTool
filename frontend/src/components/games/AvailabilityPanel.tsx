@@ -123,7 +123,7 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
         isAvailableSection={true}
       />
       <Section
-        title="Available Staff"
+        title="Available (Non-Playing)"
         players={availableStaff}
         availability={availability}
         busy={busy}

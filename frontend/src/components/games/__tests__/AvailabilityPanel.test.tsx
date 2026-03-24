@@ -52,21 +52,21 @@ describe('AvailabilityPanel', () => {
     expect(section).toHaveTextContent('Dave')
   })
 
-  it('places available injured player in Available Staff section', () => {
+  it('places available injured player in Available (Non-Playing) section', () => {
     render(<AvailabilityPanel players={[injuredPlayer]} availability={[avail(2, true)]} onToggle={vi.fn()} />)
-    const section = screen.getByText(/available staff/i).closest('div')!.parentElement!
+    const section = screen.getByText(/available \(non-playing\)/i).closest('div')!.parentElement!
     expect(section).toHaveTextContent('Bob')
   })
 
-  it('places available pregnant player in Available Staff section', () => {
+  it('places available pregnant player in Available (Non-Playing) section', () => {
     render(<AvailabilityPanel players={[pregnantPlayer]} availability={[avail(6, true)]} onToggle={vi.fn()} />)
-    const section = screen.getByText(/available staff/i).closest('div')!.parentElement!
+    const section = screen.getByText(/available \(non-playing\)/i).closest('div')!.parentElement!
     expect(section).toHaveTextContent('Faye')
   })
 
-  it('places available staff player in Available Staff section', () => {
+  it('places available staff player in Available (Non-Playing) section', () => {
     render(<AvailabilityPanel players={[staffPlayer]} availability={[avail(3, true)]} onToggle={vi.fn()} />)
-    const section = screen.getByText(/available staff/i).closest('div')!.parentElement!
+    const section = screen.getByText(/available \(non-playing\)/i).closest('div')!.parentElement!
     expect(section).toHaveTextContent('Carol')
   })
 
