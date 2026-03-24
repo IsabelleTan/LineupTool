@@ -123,6 +123,11 @@ describe('AvailabilityPanel', () => {
     expect(screen.getByText('(Pregnant)')).toBeInTheDocument()
   })
 
+  it('shows (Staff) label for staff players', () => {
+    render(<AvailabilityPanel players={[staffPlayer]} availability={[avail(3, true)]} onToggle={vi.fn()} />)
+    expect(screen.getByText('(Staff)')).toBeInTheDocument()
+  })
+
   it('does not show status label for active players', () => {
     render(<AvailabilityPanel players={[player]} availability={[avail(1, true)]} onToggle={vi.fn()} />)
     expect(screen.queryByText(/\(Active\)/)).not.toBeInTheDocument()
