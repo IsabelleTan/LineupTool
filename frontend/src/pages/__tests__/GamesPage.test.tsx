@@ -20,6 +20,7 @@ const game1: Game = {
   opponent: 'Red Sox',
   location: 'Fenway Park',
   is_home: false,
+  game_number: null,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -30,6 +31,7 @@ const game2: Game = {
   opponent: 'Yankees',
   location: null,
   is_home: true,
+  game_number: null,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -151,6 +153,22 @@ describe('GamesPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /add game/i }))
     await waitFor(() => {
       expect(screen.getByText('Server error')).toBeInTheDocument()
+    })
+  })
+
+  it('Duplicate button calls createGame with same date/opponent/location/is_home but no game_number', async () => {
+    vi.mocked(createGame).mockResolvedValue({ ...game1, id: 3, game_number: null })
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
+    await waitFor(() => screen.getByText('Red Sox'))
+    const dupButtons = screen.getAllByRole('button', { name: /duplicate/i })
+    await userEvent.click(dupButtons[0])
+    await waitFor(() => {
+      expect(createGame).toHaveBeenCalledWith({
+        game_date: game1.game_date,
+        opponent: game1.opponent,
+        location: game1.location,
+        is_home: game1.is_home,
+      })
     })
   })
 

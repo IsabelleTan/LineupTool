@@ -47,3 +47,25 @@ def test_get_game_not_found(client):
 def test_update_game_not_found(client):
     r = client.patch("/api/games/99999", json={"opponent": "Wolves"})
     assert r.status_code == 404
+
+
+def test_game_number_stored_and_returned(client):
+    r = client.post(
+        "/api/games/",
+        json={"game_date": "2026-06-01", "opponent": "Eagles", "game_number": 1},
+    )
+    assert r.status_code == 201
+    assert r.json()["game_number"] == 1
+
+    gid = r.json()["id"]
+    r2 = client.patch(f"/api/games/{gid}", json={"game_number": 2})
+    assert r2.status_code == 200
+    assert r2.json()["game_number"] == 2
+
+
+def test_game_number_defaults_to_null(client):
+    r = client.post(
+        "/api/games/", json={"game_date": "2026-06-01", "opponent": "Hawks"}
+    )
+    assert r.status_code == 201
+    assert r.json()["game_number"] is None

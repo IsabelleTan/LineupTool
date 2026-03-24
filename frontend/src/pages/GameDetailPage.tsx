@@ -219,6 +219,7 @@ export default function GameDetailPage() {
           ) : (
             <Badge variant="secondary">Away</Badge>
           )}
+          {game.game_number != null && <> · Game #{game.game_number}</>}
         </p>
         {game.location && <p className="text-muted-foreground">{game.location}</p>}
       </div>

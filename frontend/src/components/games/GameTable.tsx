@@ -15,10 +15,11 @@ interface Props {
   games: Game[]
   onView: (game: Game) => void
   onEdit: (game: Game) => void
+  onDuplicate: (game: Game) => void
   onDelete: (game: Game) => void
 }
 
-export default function GameTable({ games, onView, onEdit, onDelete }: Props) {
+export default function GameTable({ games, onView, onEdit, onDuplicate, onDelete }: Props) {
   if (games.length === 0) {
     return (
       <p className="text-center text-muted-foreground py-12">No games yet.</p>
@@ -30,6 +31,7 @@ export default function GameTable({ games, onView, onEdit, onDelete }: Props) {
       <TableHeader>
         <TableRow>
           <TableHead>Date</TableHead>
+          <TableHead className="w-8">#</TableHead>
           <TableHead>Opponent</TableHead>
           <TableHead>Location</TableHead>
           <TableHead>Home/Away</TableHead>
@@ -44,6 +46,7 @@ export default function GameTable({ games, onView, onEdit, onDelete }: Props) {
             onClick={() => onView(game)}
           >
             <TableCell>{formatDate(game.game_date)}</TableCell>
+            <TableCell className="text-muted-foreground">{game.game_number ?? '—'}</TableCell>
             <TableCell className="font-medium">{game.opponent}</TableCell>
             <TableCell className="text-muted-foreground">{game.location ?? '—'}</TableCell>
             <TableCell>
@@ -69,6 +72,14 @@ export default function GameTable({ games, onView, onEdit, onDelete }: Props) {
                 onClick={(e) => { e.stopPropagation(); onEdit(game) }}
               >
                 Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => { e.stopPropagation(); onDuplicate(game) }}
+              >
+                Duplicate
               </Button>
               <Button
                 size="sm"

@@ -11,6 +11,7 @@ const awayGame: Game = {
   opponent: 'Flyers',
   location: 'Bern',
   is_home: false,
+  game_number: null,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -101,6 +102,12 @@ describe('LineupPrintView', () => {
     render(<LineupPrintView game={awayGame} slots={[]} players={[alice]} availablePlayers={[alice]} />)
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('L123')).toBeInTheDocument()
+  })
+
+  it('shows game_number in SPIELNUMMER field when set', () => {
+    const numberedGame = { ...awayGame, game_number: 2 }
+    render(<LineupPrintView game={numberedGame} slots={[]} players={[]} availablePlayers={[]} />)
+    expect(screen.getByText('2')).toBeInTheDocument()
   })
 
   it('shows signature blocks for manager and umpire', () => {

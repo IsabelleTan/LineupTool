@@ -72,6 +72,17 @@ export default function GamesPage() {
     await load()
   }
 
+  async function handleDuplicate(game: Game) {
+    await createGame({
+      game_date: game.game_date,
+      opponent: game.opponent,
+      location: game.location,
+      is_home: game.is_home,
+    })
+    showToast('Game duplicated')
+    await load()
+  }
+
   async function handleDelete(game: Game) {
     if (!confirm(`Delete game vs ${game.opponent}?`)) return
     await deleteGame(game.id)
@@ -99,6 +110,7 @@ export default function GamesPage() {
                   games={upcoming}
                   onView={(g) => navigate(`/games/${g.id}`)}
                   onEdit={openEdit}
+                  onDuplicate={(g) => void handleDuplicate(g)}
                   onDelete={(g) => void handleDelete(g)}
                 />
             }
@@ -111,6 +123,7 @@ export default function GamesPage() {
                   games={past}
                   onView={(g) => navigate(`/games/${g.id}`)}
                   onEdit={openEdit}
+                  onDuplicate={(g) => void handleDuplicate(g)}
                   onDelete={(g) => void handleDelete(g)}
                 />
             }
