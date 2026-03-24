@@ -9,6 +9,7 @@ class GameCreate(BaseModel):
     opponent: str
     location: Optional[str] = None
     is_home: bool = True
+    game_number: Optional[int] = None
 
 
 class GameUpdate(BaseModel):
@@ -16,6 +17,7 @@ class GameUpdate(BaseModel):
     opponent: Optional[str] = None
     location: Optional[str] = None
     is_home: Optional[bool] = None
+    game_number: Optional[int] = None
 
 
 class GameRead(BaseModel):
@@ -24,6 +26,7 @@ class GameRead(BaseModel):
     opponent: str
     location: Optional[str]
     is_home: bool
+    game_number: Optional[int]
     created_at: datetime
     updated_at: datetime
 

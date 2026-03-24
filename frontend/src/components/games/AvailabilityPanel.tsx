@@ -51,6 +51,11 @@ function PlayerRow({ player, isAvailable, record, busy, busyPlayerId, onToggle }
       <span className="text-sm">
         {player.name}
         <PlayerHint player={player} />
+        {(player.role === 'Staff' || player.status === 'Injured' || player.status === 'Pregnant') && (
+          <span className="text-muted-foreground text-xs ml-1">
+            ({player.role === 'Staff' ? 'Staff' : player.status})
+          </span>
+        )}
       </span>
     </div>
   )
@@ -102,11 +107,12 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
     return <p className="text-muted-foreground text-sm">No players found.</p>
   }
 
+  const nonPlayingStatuses = ['Injured', 'Pregnant']
   const availablePlayers = players.filter(
-    (p) => isPlayerAvailable(p, availability) && p.role === 'Player' && p.status !== 'Injured',
+    (p) => isPlayerAvailable(p, availability) && p.role === 'Player' && !nonPlayingStatuses.includes(p.status),
   )
   const availableStaff = players.filter(
-    (p) => isPlayerAvailable(p, availability) && (p.role === 'Staff' || p.status === 'Injured'),
+    (p) => isPlayerAvailable(p, availability) && (p.role === 'Staff' || nonPlayingStatuses.includes(p.status)),
   )
   const unavailable = players.filter((p) => !isPlayerAvailable(p, availability))
 
@@ -122,7 +128,7 @@ export default function AvailabilityPanel({ players, availability, onToggle, bus
         isAvailableSection={true}
       />
       <Section
-        title="Available Staff"
+        title="Available (Non-Playing)"
         players={availableStaff}
         availability={availability}
         busy={busy}

@@ -11,6 +11,7 @@ const mockGame = {
   opponent: 'Red Sox',
   location: 'Fenway Park',
   is_home: false,
+  game_number: null,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }

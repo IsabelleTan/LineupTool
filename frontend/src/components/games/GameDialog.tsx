@@ -24,6 +24,7 @@ interface FormState {
   opponent: string
   location: string
   is_home: boolean
+  game_number: string
 }
 
 function toFormState(game?: Game): FormState {
@@ -32,6 +33,7 @@ function toFormState(game?: Game): FormState {
     opponent: game?.opponent ?? '',
     location: game?.location ?? '',
     is_home: game?.is_home ?? true,
+    game_number: game?.game_number != null ? String(game.game_number) : '',
   }
 }
 
@@ -62,6 +64,7 @@ export default function GameDialog({ open, onClose, onSubmit, game }: Props) {
         opponent: form.opponent.trim(),
         location: form.location.trim() || null,
         is_home: form.is_home,
+        game_number: form.game_number !== '' ? Number(form.game_number) : null,
       })
       onClose()
     } catch (err) {
@@ -110,6 +113,18 @@ export default function GameDialog({ open, onClose, onSubmit, game }: Props) {
               name="location"
               value={form.location}
               onChange={handleChange}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="game_number">Game #</Label>
+            <Input
+              id="game_number"
+              name="game_number"
+              type="number"
+              min={1}
+              value={form.game_number}
+              onChange={handleChange}
+              placeholder="e.g. 1"
             />
           </div>
           <div className="flex items-center gap-2">

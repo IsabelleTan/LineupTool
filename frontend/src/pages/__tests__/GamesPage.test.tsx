@@ -12,7 +12,21 @@ vi.mock('@/api/games', () => ({
   deleteGame: vi.fn(),
 }))
 
+vi.mock('@/api/availability', () => ({
+  getAvailability: vi.fn(),
+  createAvailability: vi.fn(),
+}))
+
+vi.mock('@/api/lineups', () => ({
+  getLineups: vi.fn(),
+  getLineup: vi.fn(),
+  createLineup: vi.fn(),
+  createSlot: vi.fn(),
+}))
+
 import { getGames, createGame, updateGame, deleteGame } from '@/api/games'
+import { getAvailability, createAvailability } from '@/api/availability'
+import { getLineups, getLineup, createLineup, createSlot } from '@/api/lineups'
 
 const game1: Game = {
   id: 1,
@@ -20,6 +34,7 @@ const game1: Game = {
   opponent: 'Red Sox',
   location: 'Fenway Park',
   is_home: false,
+  game_number: null,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -30,6 +45,7 @@ const game2: Game = {
   opponent: 'Yankees',
   location: null,
   is_home: true,
+  game_number: null,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -37,6 +53,12 @@ const game2: Game = {
 beforeEach(() => {
   vi.resetAllMocks()
   vi.mocked(getGames).mockResolvedValue([game1, game2])
+  vi.mocked(getAvailability).mockResolvedValue([])
+  vi.mocked(createAvailability).mockResolvedValue({ id: 1, game_id: 99, player_id: 1, is_available: true, created_at: '', updated_at: '' })
+  vi.mocked(getLineups).mockResolvedValue([])
+  vi.mocked(getLineup).mockResolvedValue({ id: 1, game_id: 1, name: 'Default', is_final: false, created_at: '', updated_at: '', slots: [] })
+  vi.mocked(createLineup).mockResolvedValue({ id: 1, game_id: 99, name: 'Default', is_final: false, created_at: '', updated_at: '' })
+  vi.mocked(createSlot).mockResolvedValue({ id: 1, lineup_id: 1, player_id: 1, batting_order: 1, fielding_position: 'SS', created_at: '', updated_at: '' })
 })
 
 describe('GamesPage', () => {
@@ -151,6 +173,54 @@ describe('GamesPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /add game/i }))
     await waitFor(() => {
       expect(screen.getByText('Server error')).toBeInTheDocument()
+    })
+  })
+
+  it('Duplicate button calls createGame with same date/opponent/location/is_home but no game_number', async () => {
+    vi.mocked(createGame).mockResolvedValue({ ...game1, id: 3, game_number: null })
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
+    await waitFor(() => screen.getByText('Red Sox'))
+    const dupButtons = screen.getAllByRole('button', { name: /duplicate/i })
+    await userEvent.click(dupButtons[0])
+    await waitFor(() => {
+      expect(createGame).toHaveBeenCalledWith({
+        game_date: game1.game_date,
+        opponent: game1.opponent,
+        location: game1.location,
+        is_home: game1.is_home,
+      })
+    })
+  })
+
+  it('Duplicate copies availability records to the new game', async () => {
+    const newGame = { ...game1, id: 3, game_number: null }
+    vi.mocked(createGame).mockResolvedValue(newGame)
+    vi.mocked(getAvailability).mockResolvedValue([
+      { id: 1, game_id: game1.id, player_id: 10, is_available: true, created_at: '', updated_at: '' },
+    ])
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
+    await waitFor(() => screen.getByText('Red Sox'))
+    await userEvent.click(screen.getAllByRole('button', { name: /duplicate/i })[0])
+    await waitFor(() => {
+      expect(createAvailability).toHaveBeenCalledWith(3, 10, true)
+    })
+  })
+
+  it('Duplicate copies lineup slots to the new game', async () => {
+    const newGame = { ...game1, id: 3, game_number: null }
+    const newLineup = { id: 55, game_id: 3, name: 'Default', is_final: false, created_at: '', updated_at: '' }
+    vi.mocked(createGame).mockResolvedValue(newGame)
+    vi.mocked(getLineups).mockResolvedValue([{ id: 10, game_id: game1.id, name: 'Default', is_final: false, created_at: '', updated_at: '' }])
+    vi.mocked(getLineup).mockResolvedValue({ id: 10, game_id: game1.id, name: 'Default', is_final: false, created_at: '', updated_at: '',
+      slots: [{ id: 1, lineup_id: 10, player_id: 7, batting_order: 1, fielding_position: 'SS', created_at: '', updated_at: '' }],
+    })
+    vi.mocked(createLineup).mockResolvedValue(newLineup)
+    render(<MemoryRouter><GamesPage /></MemoryRouter>)
+    await waitFor(() => screen.getByText('Red Sox'))
+    await userEvent.click(screen.getAllByRole('button', { name: /duplicate/i })[0])
+    await waitFor(() => {
+      expect(createLineup).toHaveBeenCalledWith({ game_id: 3 })
+      expect(createSlot).toHaveBeenCalledWith(55, { player_id: 7, batting_order: 1, fielding_position: 'SS' })
     })
   })
 

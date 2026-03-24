@@ -44,6 +44,7 @@ const game: Game = {
   opponent: 'Red Sox',
   location: 'Fenway Park',
   is_home: false,
+  game_number: null,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -134,8 +135,9 @@ describe('GameDetailPage', () => {
   it('renders game header after load', async () => {
     renderPage()
     await waitFor(() => {
-      expect(screen.getByText(/vs Red Sox/i)).toBeInTheDocument()
-      expect(screen.getByText(/Fenway Park/i)).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /vs Red Sox/i })).toBeInTheDocument()
+      // Fenway Park appears in both the header and the print sheet
+      expect(screen.getAllByText(/Fenway Park/i).length).toBeGreaterThan(0)
     })
   })
 
@@ -279,6 +281,16 @@ describe('GameDetailPage', () => {
     })
   })
 
+  it('availablePlayers excludes pregnant players from diamond even when available', async () => {
+    const pregnantPlayer = { ...player, id: 20, name: 'Faye', status: 'Pregnant' }
+    const pregnantAvail: GameAvailability = { ...availabilityRecord, player_id: 20, id: 99 }
+    vi.mocked(getPlayers).mockResolvedValue([pregnantPlayer])
+    vi.mocked(getAvailability).mockResolvedValue([pregnantAvail])
+    renderPage()
+    await waitFor(() => screen.getByRole('button', { name: /mark unavailable/i }))
+    expect(screen.queryByRole('button', { name: 'Faye' })).not.toBeInTheDocument()
+  })
+
   it('availablePlayers excludes players with explicit is_available: false', async () => {
     const unavailRecord: GameAvailability = { ...availabilityRecord, is_available: false }
     vi.mocked(getAvailability).mockResolvedValue([unavailRecord])
@@ -286,6 +298,16 @@ describe('GameDetailPage', () => {
     await waitFor(() => screen.getByRole('button', { name: /mark available/i }))
     // Alice is explicitly unavailable — should not appear on diamond
     expect(screen.queryByRole('button', { name: 'Alice' })).not.toBeInTheDocument()
+  })
+
+  it('Print button calls window.print with correct document title', async () => {
+    const printSpy = vi.spyOn(window, 'print').mockImplementation(() => {})
+    renderPage()
+    await waitFor(() => screen.getByRole('button', { name: /print/i }))
+    await userEvent.click(screen.getByRole('button', { name: /print/i }))
+    expect(printSpy).toHaveBeenCalled()
+    expect(document.title).toBe('Line Up vs Red Sox 01-06-2026')
+    printSpy.mockRestore()
   })
 
   it('busy disables diamond interaction during mutation', async () => {

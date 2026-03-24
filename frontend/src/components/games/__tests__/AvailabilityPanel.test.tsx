@@ -18,6 +18,7 @@ const player: Player = {
 }
 
 const injuredPlayer: Player = { ...player, id: 2, name: 'Bob', jersey_number: null, status: 'Injured' }
+const pregnantPlayer: Player = { ...player, id: 6, name: 'Faye', jersey_number: null, status: 'Pregnant' }
 const staffPlayer: Player = { ...player, id: 3, name: 'Carol', role: 'Staff', status: 'Active' }
 const inactivePlayer: Player = { ...player, id: 4, name: 'Dave', status: 'Inactive' }
 const noRecordPlayer: Player = { ...player, id: 5, name: 'Eve', jersey_number: '5' }
@@ -51,15 +52,21 @@ describe('AvailabilityPanel', () => {
     expect(section).toHaveTextContent('Dave')
   })
 
-  it('places available injured player in Available Staff section', () => {
+  it('places available injured player in Available (Non-Playing) section', () => {
     render(<AvailabilityPanel players={[injuredPlayer]} availability={[avail(2, true)]} onToggle={vi.fn()} />)
-    const section = screen.getByText(/available staff/i).closest('div')!.parentElement!
+    const section = screen.getByText(/available \(non-playing\)/i).closest('div')!.parentElement!
     expect(section).toHaveTextContent('Bob')
   })
 
-  it('places available staff player in Available Staff section', () => {
+  it('places available pregnant player in Available (Non-Playing) section', () => {
+    render(<AvailabilityPanel players={[pregnantPlayer]} availability={[avail(6, true)]} onToggle={vi.fn()} />)
+    const section = screen.getByText(/available \(non-playing\)/i).closest('div')!.parentElement!
+    expect(section).toHaveTextContent('Faye')
+  })
+
+  it('places available staff player in Available (Non-Playing) section', () => {
     render(<AvailabilityPanel players={[staffPlayer]} availability={[avail(3, true)]} onToggle={vi.fn()} />)
-    const section = screen.getByText(/available staff/i).closest('div')!.parentElement!
+    const section = screen.getByText(/available \(non-playing\)/i).closest('div')!.parentElement!
     expect(section).toHaveTextContent('Carol')
   })
 
@@ -104,6 +111,26 @@ describe('AvailabilityPanel', () => {
   it('shows jersey number hint next to name', () => {
     render(<AvailabilityPanel players={[player]} availability={[avail(1, true)]} onToggle={vi.fn()} />)
     expect(screen.getByText('#7')).toBeInTheDocument()
+  })
+
+  it('shows status label in parentheses for injured players', () => {
+    render(<AvailabilityPanel players={[injuredPlayer]} availability={[avail(2, true)]} onToggle={vi.fn()} />)
+    expect(screen.getByText('(Injured)')).toBeInTheDocument()
+  })
+
+  it('shows status label in parentheses for pregnant players', () => {
+    render(<AvailabilityPanel players={[pregnantPlayer]} availability={[avail(6, true)]} onToggle={vi.fn()} />)
+    expect(screen.getByText('(Pregnant)')).toBeInTheDocument()
+  })
+
+  it('shows (Staff) label for staff players', () => {
+    render(<AvailabilityPanel players={[staffPlayer]} availability={[avail(3, true)]} onToggle={vi.fn()} />)
+    expect(screen.getByText('(Staff)')).toBeInTheDocument()
+  })
+
+  it('does not show status label for active players', () => {
+    render(<AvailabilityPanel players={[player]} availability={[avail(1, true)]} onToggle={vi.fn()} />)
+    expect(screen.queryByText(/\(Active\)/)).not.toBeInTheDocument()
   })
 
   it('shows no hint when jersey is null', () => {

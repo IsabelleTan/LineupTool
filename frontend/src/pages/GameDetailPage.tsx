@@ -41,7 +41,6 @@ export default function GameDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [mutationError, setMutationError] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [printOpen, setPrintOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [busyPlayerId, setBusyPlayerId] = useState<number | null>(null)
   const { toastMessage, showToast } = useToast()
@@ -161,6 +160,14 @@ export default function GameDetailPage() {
     }
   }
 
+  function handlePrint() {
+    const prev = document.title
+    const [y, m, d] = game!.game_date.split('-')
+    document.title = `Line Up vs ${game!.opponent} ${d}-${m}-${y}`
+    window.addEventListener('afterprint', () => { document.title = prev }, { once: true })
+    window.print()
+  }
+
   async function handleEditSubmit(data: GameCreate) {
     setMutationError(null)
     try {
@@ -172,7 +179,7 @@ export default function GameDetailPage() {
   }
 
   const availablePlayers = players.filter(
-    (p) => isPlayerAvailable(p, availability) && p.role === 'Player' && p.status !== 'Injured',
+    (p) => isPlayerAvailable(p, availability) && p.role === 'Player' && !['Injured', 'Pregnant'].includes(p.status),
   )
 
   if (loading) {
@@ -212,6 +219,7 @@ export default function GameDetailPage() {
           ) : (
             <Badge variant="secondary">Away</Badge>
           )}
+          {game.game_number != null && <> · Game #{game.game_number}</>}
         </p>
         {game.location && <p className="text-muted-foreground">{game.location}</p>}
       </div>
@@ -257,8 +265,8 @@ export default function GameDetailPage() {
         <div className="rounded-lg border p-4">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-medium">Batting Order</h2>
-            <Button variant="outline" size="sm" onClick={() => setPrintOpen(true)}>
-              Print Preview
+            <Button variant="outline" size="sm" onClick={handlePrint}>
+              Print
             </Button>
           </div>
           <LineupOrder
@@ -277,15 +285,12 @@ export default function GameDetailPage() {
         game={game}
       />
 
-      {printOpen && (
-        <LineupPrintView
-          game={game}
-          slots={lineup?.slots ?? []}
-          players={players}
-          availablePlayers={availablePlayers}
-          onClose={() => setPrintOpen(false)}
-        />
-      )}
+      <LineupPrintView
+        game={game}
+        slots={lineup?.slots ?? []}
+        players={players}
+        availablePlayers={availablePlayers}
+      />
 
       <Toast message={toastMessage} />
     </div>
