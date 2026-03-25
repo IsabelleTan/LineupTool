@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, TimestampMixin
@@ -21,6 +21,9 @@ class LineupSlot(Base, TimestampMixin):
     player_id: Mapped[int] = mapped_column(ForeignKey("players.id"), nullable=False)
     batting_order: Mapped[int] = mapped_column(Integer, nullable=False)
     fielding_position: Mapped[str] = mapped_column(String, nullable=False)
+    is_flex: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
 
     lineup: Mapped["Lineup"] = relationship("Lineup", back_populates="slots")
     player: Mapped["Player"] = relationship("Player", back_populates="lineup_slots")

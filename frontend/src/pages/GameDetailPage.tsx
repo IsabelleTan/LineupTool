@@ -21,6 +21,7 @@ import {
   createLineup,
   getLineup,
   createSlot,
+  updateSlot,
   deleteSlot,
   reorderSlots,
   type LineupReadWithSlots,
@@ -145,6 +146,30 @@ export default function GameDetailPage() {
     } finally {
       setBusy(false)
     }
+  }
+
+  async function handleSetFlex(slotId: number, isFlex: boolean) {
+    if (!lineup) return
+    setBusy(true)
+    setMutationError(null)
+    try {
+      if (isFlex) {
+        const currentFlex = lineup.slots.find((s) => s.is_flex && s.id !== slotId)
+        if (currentFlex) {
+          await updateSlot(lineup.id, currentFlex.id, { is_flex: false })
+        }
+      }
+      await updateSlot(lineup.id, slotId, { is_flex: isFlex })
+      setLineup(await getLineup(lineup.id))
+    } catch (err) {
+      setMutationError(err instanceof Error ? err.message : 'Failed to update flex')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleAssignDH(playerId: number) {
+    await handleAssign(playerId, 'DH')
   }
 
   async function handleReorder(orderedSlotIds: number[]) {
@@ -274,6 +299,10 @@ export default function GameDetailPage() {
             players={players}
             availablePlayers={availablePlayers}
             onReorder={(ids) => void handleReorder(ids)}
+            onSetFlex={(slotId, isFlex) => void handleSetFlex(slotId, isFlex)}
+            onAssignDH={(playerId) => void handleAssignDH(playerId)}
+            onUnassignFlex={(slotId) => void handleSetFlex(slotId, false)}
+            busy={busy}
           />
         </div>
       </div>

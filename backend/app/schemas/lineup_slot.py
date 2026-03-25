@@ -8,11 +8,13 @@ class LineupSlotCreate(BaseModel):
     player_id: int
     batting_order: int
     fielding_position: str
+    is_flex: bool = False
 
 
 class LineupSlotUpdate(BaseModel):
     batting_order: Optional[int] = None
     fielding_position: Optional[str] = None
+    is_flex: Optional[bool] = None
 
 
 class LineupReorder(BaseModel):
@@ -25,6 +27,7 @@ class LineupSlotRead(BaseModel):
     player_id: int
     batting_order: int
     fielding_position: str
+    is_flex: bool
     created_at: datetime
     updated_at: datetime
 

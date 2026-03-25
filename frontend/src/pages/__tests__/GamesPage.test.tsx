@@ -58,7 +58,7 @@ beforeEach(() => {
   vi.mocked(getLineups).mockResolvedValue([])
   vi.mocked(getLineup).mockResolvedValue({ id: 1, game_id: 1, name: 'Default', is_final: false, created_at: '', updated_at: '', slots: [] })
   vi.mocked(createLineup).mockResolvedValue({ id: 1, game_id: 99, name: 'Default', is_final: false, created_at: '', updated_at: '' })
-  vi.mocked(createSlot).mockResolvedValue({ id: 1, lineup_id: 1, player_id: 1, batting_order: 1, fielding_position: 'SS', created_at: '', updated_at: '' })
+  vi.mocked(createSlot).mockResolvedValue({ id: 1, lineup_id: 1, player_id: 1, batting_order: 1, fielding_position: 'SS', is_flex: false, created_at: '', updated_at: '' })
 })
 
 describe('GamesPage', () => {
@@ -212,7 +212,7 @@ describe('GamesPage', () => {
     vi.mocked(createGame).mockResolvedValue(newGame)
     vi.mocked(getLineups).mockResolvedValue([{ id: 10, game_id: game1.id, name: 'Default', is_final: false, created_at: '', updated_at: '' }])
     vi.mocked(getLineup).mockResolvedValue({ id: 10, game_id: game1.id, name: 'Default', is_final: false, created_at: '', updated_at: '',
-      slots: [{ id: 1, lineup_id: 10, player_id: 7, batting_order: 1, fielding_position: 'SS', created_at: '', updated_at: '' }],
+      slots: [{ id: 1, lineup_id: 10, player_id: 7, batting_order: 1, fielding_position: 'SS', is_flex: false, created_at: '', updated_at: '' }],
     })
     vi.mocked(createLineup).mockResolvedValue(newLineup)
     render(<MemoryRouter><GamesPage /></MemoryRouter>)

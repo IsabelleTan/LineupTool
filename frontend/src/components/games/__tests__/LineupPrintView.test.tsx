@@ -48,6 +48,7 @@ const slot1: LineupSlotRead = {
   player_id: 10,
   batting_order: 1,
   fielding_position: 'SS',
+  is_flex: false,
   created_at: '2024-01-01T00:00:00',
   updated_at: '2024-01-01T00:00:00',
 }
@@ -70,11 +71,11 @@ describe('LineupPrintView', () => {
     expect(screen.getByText('Jun 12, 2026')).toBeInTheDocument()
   })
 
-  it('renders 10 batting order slots including Flex', () => {
+  it('renders 10 batting order slots with F label at slot 10', () => {
     render(<LineupPrintView game={awayGame} slots={[]} players={[]} availablePlayers={[]} />)
     expect(screen.getByText('1.')).toBeInTheDocument()
     expect(screen.getByText('9.')).toBeInTheDocument()
-    expect(screen.getByText('Flex')).toBeInTheDocument()
+    expect(screen.getByText('F')).toBeInTheDocument()
   })
 
   it('shows player name, license, jersey number and position in their batting slot', () => {

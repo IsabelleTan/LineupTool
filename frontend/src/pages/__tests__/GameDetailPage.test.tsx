@@ -109,6 +109,7 @@ beforeEach(() => {
     player_id: 10,
     batting_order: 1,
     fielding_position: 'SS',
+    is_flex: false,
     created_at: '2024-01-01T00:00:00',
     updated_at: '2024-01-01T00:00:00',
   })
@@ -120,6 +121,7 @@ beforeEach(() => {
     player_id: 10,
     batting_order: 1,
     fielding_position: 'SS',
+    is_flex: false,
     created_at: '2024-01-01T00:00:00',
     updated_at: '2024-01-01T00:00:00',
   })
@@ -267,6 +269,7 @@ describe('GameDetailPage', () => {
       player_id: 10,
       batting_order: 2,
       fielding_position: 'SS',
+      is_flex: false,
       created_at: '2024-01-01T00:00:00',
       updated_at: '2024-01-01T00:00:00',
     }
@@ -324,7 +327,7 @@ describe('GameDetailPage', () => {
     // resolve to clean up
     resolveSlot({
       id: 1, lineup_id: 100, player_id: 10, batting_order: 1,
-      fielding_position: 'SS', created_at: '', updated_at: '',
+      fielding_position: 'SS', is_flex: false, created_at: '', updated_at: '',
     })
   })
 })
