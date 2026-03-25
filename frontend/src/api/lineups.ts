@@ -15,6 +15,7 @@ export interface LineupSlotRead {
   player_id: number
   batting_order: number
   fielding_position: string
+  is_flex: boolean
   created_at: string
   updated_at: string
 }
@@ -27,11 +28,13 @@ export interface LineupSlotCreate {
   player_id: number
   batting_order: number
   fielding_position: string
+  is_flex?: boolean
 }
 
 export interface LineupSlotUpdate {
   batting_order?: number
   fielding_position?: string
+  is_flex?: boolean
 }
 
 export function getLineups(gameId: number): Promise<LineupRead[]> {

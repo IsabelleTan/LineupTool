@@ -32,7 +32,10 @@ const hCell: React.CSSProperties = {
 const ROW_H = '20px'
 
 export default function LineupPrintView({ game, slots, players, availablePlayers }: Props) {
-  const ordered = [...slots].sort((a, b) => a.batting_order - b.batting_order)
+  const flexSlot = slots.find((s) => s.is_flex)
+  const regularSlots = [...slots]
+    .filter((s) => !s.is_flex)
+    .sort((a, b) => a.batting_order - b.batting_order)
   const assignedIds = new Set(slots.map((s) => s.player_id))
   const bench = availablePlayers.filter((p) => !assignedIds.has(p.id))
   const licensedBench = bench.filter((p) => p.license_number)
@@ -56,12 +59,12 @@ export default function LineupPrintView({ game, slots, players, availablePlayers
   const homeTeam = game.is_home ? 'Challengers' : game.opponent
   const guestTeam = game.is_home ? game.opponent : 'Challengers'
 
-  // 10 display rows: first 9 from actual slots, slot 10 reserved for Flex
+  // 10 display rows: first 9 from regular slots (including DH), row 10 = Flex player
   const displaySlots = Array.from({ length: TOTAL_BATTING_SLOTS }, (_, i) => {
-    const isFlex = i === TOTAL_BATTING_SLOTS - 1
-    const slot = isFlex ? null : (ordered[i] ?? null)
+    const isSlot10 = i === TOTAL_BATTING_SLOTS - 1
+    const slot = isSlot10 ? (flexSlot ?? null) : (regularSlots[i] ?? null)
     const player = slot ? findPlayer(slot.player_id) : null
-    return { index: i, slot, player, isFlex }
+    return { index: i, slot, player, isSlot10 }
   })
 
   // Blank rows to pad right-side bench tables so they don't look sparse
@@ -149,7 +152,10 @@ export default function LineupPrintView({ game, slots, players, availablePlayers
               </tr>
             </thead>
             <tbody>
-              {displaySlots.map(({ index, slot, player, isFlex }) => (
+              {displaySlots.map(({ index, slot, player, isSlot10 }) => {
+                const slotLabel = isSlot10 ? 'F' : `${index + 1}.`
+                const showData = slot !== null
+                return (
                 <React.Fragment key={index}>
                   {/* Row 1: player data */}
                   <tr>
@@ -160,24 +166,24 @@ export default function LineupPrintView({ game, slots, players, availablePlayers
                         textAlign: 'center',
                         fontWeight: 'bold',
                         verticalAlign: 'middle',
-                        backgroundColor: isFlex ? '#f0f0f0' : undefined,
-                        fontSize: isFlex ? '7pt' : '9pt',
+                        backgroundColor: isSlot10 ? '#f0f0f0' : undefined,
+                        fontSize: isSlot10 ? '7pt' : '9pt',
                         lineHeight: 1.1,
                       }}
                     >
-                      {isFlex ? 'Flex' : `${index + 1}.`}
+                      {slotLabel}
                     </td>
                     <td style={{ ...cell, height: ROW_H, overflow: 'hidden' }}>
-                      {!isFlex ? (player?.license_number ?? '') : ''}
+                      {showData ? (player?.license_number ?? '') : ''}
                     </td>
                     <td style={{ ...cell, height: ROW_H, textAlign: 'center', overflow: 'hidden' }}>
-                      {!isFlex ? (player?.jersey_number ?? '') : ''}
+                      {showData ? (player?.jersey_number ?? '') : ''}
                     </td>
                     <td style={{ ...cell, height: ROW_H, overflow: 'hidden' }}>
-                      {!isFlex ? (player?.name ?? '') : ''}
+                      {showData ? (player?.name ?? '') : ''}
                     </td>
                     <td style={{ ...cell, height: ROW_H, textAlign: 'center', overflow: 'hidden' }}>
-                      {!isFlex ? (slot?.fielding_position ?? '') : ''}
+                      {showData ? (slot?.fielding_position ?? '') : ''}
                     </td>
                   </tr>
                   {/* Rows 2–3: blank for substitutions */}
@@ -194,7 +200,8 @@ export default function LineupPrintView({ game, slots, players, availablePlayers
                     <td style={{ ...cell, height: ROW_H }} />
                   </tr>
                 </React.Fragment>
-              ))}
+                )
+              })}
             </tbody>
           </table>
             </td>
